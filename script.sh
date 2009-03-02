@@ -152,8 +152,7 @@ function script_checkopts
         OPTDOC=${SCRIPTOPTDOCS[A]}
 
         if [[ "$1" =~ $OPTTAG ]]; then
-          if [[ "$OPTDEF" =~ \<true\>|\<false\>|\<yes\>|\<no\> ]]; then
-            echo $1
+          if [[ "$OPTDEF" =~ ^true$|^false$|^yes$|^no$ ]]; then
             eval $OPTVAR="true"
             MATCH="true"
           else
@@ -164,7 +163,7 @@ function script_checkopts
         fi
       done
 
-      if true MATCH; then
+      if ! true MATCH; then
         echo "unknown argument: $1"
         RETVAL=1
         HELP="true"
@@ -200,7 +199,7 @@ function script_checkopts
 
 function script_checkroot
 {
-  [ "$UID" != "0" ] && exit_message "$SCRIPT must be run as root"
+  [ "$UID" != "0" ] && message_exit "$SCRIPT must be run as root"
 }
 
 function script_run

@@ -26,11 +26,11 @@ function defined {
 }
 
 function true {
-  [ ${!1} == "true" ] || [ ${!1} == "yes" ]
+  [ "${!1}" == "true" ] || [ "${!1}" == "yes" ]
 }
 
 function false {
-  [ ${!1} != "true" ] && [ ${!1} != "yes" ]
+  [ "${!1}" != "true" ] && [ "${!1}" != "yes" ]
 }
 
 function keyval
