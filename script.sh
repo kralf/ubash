@@ -180,10 +180,10 @@ function script_checkopts
 
   if [ -n "$SCRIPTARGVAR" ]; then
     if [ ${#SCRIPTARGS[@]} != 0 ]; then
-      eval $SCRIPTARGVAR="${SCRIPTARGS[@]}"
+      eval "$SCRIPTARGVAR=\"${SCRIPTARGS[@]}\""
     else
       if [ -n "$SCRIPTARGDEF" ]; then
-        eval $SCRIPTARGVAR="$SCRIPTARGDEF"
+        eval "$SCRIPTARGVAR=\"$SCRIPTARGDEF\""
       else
         echo "missing argument(s): $SCRIPTARGVAR"
         RETVAL=1

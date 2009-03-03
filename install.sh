@@ -176,3 +176,33 @@ function install_svn
 
   message_end "success, svn content installed"
 }
+
+function install_archives
+{
+  ROOT=$1
+  shift
+  message_start "installing archives to $ROOT"
+
+  while [ -n "$1" ]; do
+    message_start "installing archive $1"
+
+    case ${1##*.} in
+      tar) INSTOPTS="-xf"
+           ;;
+      bz2) INSTOPTS="-xjf"
+           ;;
+      gz)  INSTOPTS="-xzf"
+           ;;
+      tgz) INSTOPTS="-xzf"
+           ;;
+        *) message_exit "archive $1 has unsupported format"
+           ;;
+    esac
+    execute "tar $INSTOPTS $1 -C $ROOT"
+
+    message_end
+    shift
+  done
+
+  message_end "success, archives installed"
+}
