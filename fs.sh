@@ -37,7 +37,7 @@ function fs_abspath
 {
   unset ABSPATH
 
-  if [ -d "$1" ]; then
+  if [ -d "`dirname $1`" ]; then
     ABSPWD=`pwd`
     cd `dirname $1`
 
@@ -46,7 +46,7 @@ function fs_abspath
     cd $ABSPWD
   fi
 
-  [ -z "$ABSPATH" ] && message_warn "directory $1 does not exist"
+  [ -z "$ABSPATH" ] && message_warn "path to $1 is invalid"
 
   eval $2=$ABSPATH
 }

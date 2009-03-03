@@ -21,8 +21,20 @@
 
 # Log settings
 
-LOGFILE="`basename $0 .sh`.log"
+! defined LOGILE && fs_abspath "`basename $0 .sh`.log" LOGFILE
 VERBOSE="false"
+
+function log_command
+{
+  echo "COMMAND: $1" > $LOGFILE
+  echo "INVOKED BY: $SCRIPT" >> $LOGFILE
+  echo "INVOKED IN: `pwd`" >> $LOGFILE
+  echo "TIMESTAMP: `date`" >> $LOGFILE
+  echo -n "ENVIRONMENT: " >> $LOGFILE
+  echo `printenv` >> $LOGFILE
+  echo -n "****************************************" >> $LOGFILE
+  echo "****************************************" >> $LOGFILE
+}
 
 function log_clean
 {

@@ -99,7 +99,7 @@ function install_packages
       fi
 
       APTCMD="$APTENV $APTGET install $APTOPTS $DPKGOPTS $PKGNAME"
-      APTINPUT=`echo $PKGARGS | grep -o "<.*>" | sed s/"<"// | sed s/">"//`
+      APTINPUT=`echo $PKGARGS | grep -o "\[.*\]" | sed s/"\["// | sed s/"\]"//`
       if [ -n "$APTINPUT" ]; then
         export "DEBIAN_FRONTEND=teletype"
         APTCMD="echo $APTINPUT | sed s/':'/'\n'/g | $APTCMD"
@@ -148,4 +148,31 @@ function install_template
   execute "$TMPLCMD"
 
   message_end
+}
+
+function install_svn
+{
+  CPOPTS="-dR --preserve=mode,timestamps --remove-destination --parents"
+  FINDOPTS="-depth -name .svn -exec rm -rf '{}' \;"
+  
+  ROOT=$1
+  shift
+  message_start "installing svn content to $ROOT"
+
+  while [ -n "$1" ]; do
+    INSTSVNDIRS="`find $1 -maxdepth 0 2> $NULL`"
+
+    for INSTSVNDIR in $INSTSVNDIRS; do
+      message_start "installing svn directory $INSTSVNDIR"
+
+      execute "cp $CPOPTS $INSTSVNDIR $ROOT"
+      execute "find $ROOT/$INSTSVNDIR $FINDOPTS"
+
+      message_end
+    done
+
+    shift
+  done
+
+  message_end "success, svn content installed"
 }

@@ -41,12 +41,13 @@ function keyval
 
 function include
 {
-  while [ -n "$1" ]; do
-    INCPWD=`dirname ${BASH_ARGV[0]}`
+  INCSOURCE=${BASH_SOURCE[1]}
+  [ "$0" == "$INCSOURCE" ] && INCDIR=`pwd` || INCDIR=`dirname $INCSOURCE`
 
-    if [ -e "$INCPWD/$1" ]; then
-      . "$INCPWD/$1"
-      INCLUDES=("$INCPWD/$1" ${INCLUDES[*]})
+ while [ -n "$1" ]; do
+    if [ -e "$INCDIR/$1" ]; then
+      . "$INCDIR/$1"
+      INCLUDES=("$INCDIR/$1" ${INCLUDES[*]})
     else
       message_exit "missing include $1"
     fi

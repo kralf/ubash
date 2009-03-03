@@ -28,15 +28,8 @@ function execute
   while [ -n "$1" ]; do
     true VERBOSE && message "executing \"$1\""
 
-    echo "COMMAND: $1" > $LOGFILE
-    echo "INVOKED BY: $SCRIPT" >> $LOGFILE
-    echo "INVOKED IN: `pwd`" >> $LOGFILE
-    echo "TIMESTAMP: `date`" >> $LOGFILE
-    echo -n "ENVIRONMENT: " >> $LOGFILE
-    echo `printenv` >> $LOGFILE
-    echo -n "****************************************" >> $LOGFILE
-    echo "****************************************" >> $LOGFILE
-    eval $1 >> $LOGFILE 2>&1
+    log_command "$1"
+    eval "$1" >> $LOGFILE 2>&1
 
     [ "$?" != 0 ] && message_exit "failed to execute command \"$1\""
     shift
@@ -58,5 +51,17 @@ function execute_root
   ROOT=$1
   shift
 
-  execute "chroot $ROOT sh -l -c \"$1\""
+  true VERBOSE && message_start "executing commands in $ROOT"
+
+  while [ -n "$1" ]; do
+    true VERBOSE && message "executing \"$1\""
+
+    log_command "$1"
+    chroot $ROOT sh -l -c "$1" >> $LOGFILE 2>&1
+
+    [ "$?" != 0 ] && message_exit "failed to execute command \"$1\""
+    shift
+  done
+
+  true VERBOSE && message_end "success, all commands executed"
 }

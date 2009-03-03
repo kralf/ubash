@@ -175,6 +175,7 @@ function script_checkopts
     shift
   done
 
+  fs_abspath $LOGFILE LOGFILE
   log_clean
 
   if [ -n "$SCRIPTARGVAR" ]; then
