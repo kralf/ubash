@@ -44,7 +44,7 @@ SCRIPTOPTVARS=("HELP"
 
 SCRIPTOPTDEFS=("false"
                "false"
-               "$LOGFILE")
+               "`basename $0 .sh`.log")
 
 SCRIPTOPTDOCS=("display usage and exit"
                "generate verbose command output"

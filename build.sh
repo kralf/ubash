@@ -19,48 +19,58 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
 
-# Networking functions
+# Build functions
 
-function network_gethostip
+function build_checktools
 {
-  unset HOSTIP
-
-  if [ -n "$HOSTNAME" ]; then
-    THISHOSTNAME=`hostname -f | grep "^$1$"`
-    THISHOSTALIAS=`hostname -a | grep -o "$1"`
-
-    if [ -z "$THISHOSTNAME" ] && [ -z "$THISHOSTALIAS" ]; then
-      HOSTIP=`host $1 | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*"`
-    else
-      HOSTIP=`hostname -i`
-    fi
-  else
-    HOSTIP=`hostname -i`
-  fi
-
-  [ -z "$HOSTIP" ] && message_warn "failed to determine address of host $1"
-
-  eval $2=$HOSTIP
-}
-
-function network_upfiles
-{
-  USER=$1
-  HOST=$2
-  ROOT=$3
+  TARGET=$1
   shift
-  shift
-  shift
-  message_start "uploading files to $HOST"
+
+  message_start "checking the build tools"
 
   while [ -n "$1" ]; do
-    message_start "uploading file $1"
+    message_start "checking $1"
 
-    execute "scp $1 $USER@$HOST:$ROOT"
+    execute "$TARGET-linux-$1 --version"
 
     message_end
     shift
   done
 
-  message_end "success, files uploaded"
+  message_end "success, build tools seem to be okay"
+}
+
+function build_setenv
+{
+  ROOT=$1
+  TARGET=$2
+  DEBUG=$3
+
+  message_start "setting up the $TARGET build environment"
+
+  CPP="$TARGET-linux-cpp"
+  CC="$TARGET-linux-gcc"
+  CXX="$TARGET-linux-g++"
+  AR="$TARGET-linux-ar"
+  AS="$TARGET-linux-as"
+  RANLIB="$TARGET-linux-ranlib"
+  LD="$TARGET-linux-ld"
+  STRIP="$TARGET-linux-strip"
+  export CC CXX AR AS RANLIB LD STRIP
+
+  CFLAGS="-I$ROOT/include -I$ROOT/usr/include"
+  LDFLAGS="-L$ROOT/lib -L$ROOT/usr/lib"
+  true DEBUG && LDFLAGS="$LDFLAGS -s"
+  export CFLAGS LDFLAGS
+
+  message_end
+}
+
+function build_stripsyms {
+  message_start "stripping symbols from all objects in $1"
+
+  execute "find $1 -name *.so -exec $STRIP -s {} ;"
+  execute "find $1 -perm /111 -exec $STRIP -s {} ;"
+
+  message_end
 }

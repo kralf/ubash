@@ -21,6 +21,50 @@
 
 # File system functions
 
+function fs_checkfilerd
+{
+  message_start "checking if file $1 is readable"
+
+  if ! [ -f "$1" ] || ! [ -r "$1" ]; then
+    message_exit "file $1 is not readable"
+  fi
+
+  message_end
+}
+
+function fs_checkfilewr
+{
+  message_start "checking if file $1 is writable"
+
+  if ! [ -f "$1" ] || ! [ -w "$1" ]; then
+    message_exit "file $1 is not writable"
+  fi
+
+  message_end
+}
+
+function fs_checkdirrd
+{
+  message_start "checking if directory $1 is readable"
+
+  if ! [ -d "$1" ] || ! [ -r "$1" ]; then
+    message_exit "directory $1 is not readable"
+  fi
+
+  message_end
+}
+
+function fs_checkdirwr
+{
+  message_start "checking if directory $1 is writable"
+
+  if ! [ -d "$1" ] || ! [ -w "$1" ]; then
+    message_exit "directory $1 is not writable"
+  fi
+
+  message_end
+}
+
 function fs_getfilesize
 {
   FILESIZE=(`du -hks $1 2> $NULL`)
@@ -126,19 +170,14 @@ function fs_rmfiles
   shift
   message_start "removing files in $ROOT"
 
-  RMPWD=`pwd`
-  execute "cd $ROOT"
-
   while [ -n "$1" ]; do
     message_start "removing file(s) $1"
 
-    execute "find -wholename .$1 -exec rm -rf {} \;"
+    execute "find $ROOT -name $1 -type f -exec rm -rf {} \;"
 
     message_end
     shift
   done
-
-  execute "cd $RMPWD"
 
   message_end "success, files removed"
 }
@@ -286,4 +325,52 @@ function fs_wrfiles
   done
 
   message_end "success, files written"
+}
+
+function fs_mountimg
+{
+  message_start "mounting filesystem image to $2"
+
+  execute "mkdir -p $2"
+  execute "mount -o loop $1 $2"
+
+  message_end
+}
+
+function fs_umountimg
+{
+  message_start "unmounting filesystem image from $2"
+
+  execute "umount $2"
+  execute "rm -rf $2"
+
+  message_end
+}
+
+function fs_mkimg
+{
+  message_start "making filesystem image $1"
+
+  message_start "evaluating image size"
+  fs_getdirsize $2 FSSIZE
+  math_calc "$FSSIZE*1.05+$6" FSSIZE
+  message_end
+
+  message_start "writing zeroed image"
+  execute "dd if=/dev/zero of=$1 bs=1k count=$FSSIZE"
+  message_end
+
+  message_start "building $4 filesystem on image device"
+  execute "/sbin/mkfs -t $4 -F $1 -b $5"
+  message_end
+
+  fs_mountimg $1 $3
+
+  message_start "copying filesystem content to image"
+  execute "cp -a $2/* $3"
+  message_end
+
+  fs_umountimg $1 $3
+
+  message_end "success, size of the filesystem image is ${FSSIZE}kB"
 }
