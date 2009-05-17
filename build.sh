@@ -74,3 +74,134 @@ function build_stripsyms {
 
   message_end
 }
+
+function build_patchdir
+{
+  ROOT=$1
+  shift
+
+  message_start "patching directory $ROOT"
+
+  while [ -n "$1" ]; do
+    message_start "applying $1"
+
+    execute "patch -d $ROOT -p0 < $1"
+
+    message_end
+    shift
+  done
+
+  message_end "success, directory patched"
+}
+
+function build_packages
+{
+  SUFFIX=$1
+  shift
+
+  PKGDIR=$1
+  shift
+  fs_abspath $1 CONFDIR
+  shift
+  PATCHDIR=$1
+  shift
+
+  BUILDROOT=$1
+  shift
+  fs_abspath $1 ROOT
+  USRROOT="$ROOT/usr"
+  shift
+
+  HOST=$1
+  shift
+  TARGET=$1
+  shift
+  MAKEOPTS=$1
+  shift
+  INSTALL=$1
+  shift
+
+  message_boldstart "building packages"
+
+  while [ -n "$1" ]; do
+    message_boldstart "building package $1"
+
+    ALIAS="$1"
+    ADDONS=""
+    BUILDDIR="."
+    CONFIGURE=("./configure --prefix=$USRROOT --exec-prefix=$ROOT")
+    MAKEBUILD=("make $MAKEOPTS all")
+    MAKEINSTALL=("make $MAKEOPTS install")
+    COMMENT="this may take a while"
+    PKG=""
+    PKGBUILDROOT=$BUILDROOT/$ALIAS
+
+    [ -r "$CONFDIR/$1.$SUFFIX" ] && include "$CONFDIR/$1.$SUFFIX"
+    if [ -z "$PKG" ] || [ ! -r "$PKG" ]; then
+      fs_getfiles "$PKGDIR/$ALIAS-[0-9]*.{tar,gz,tgz,bz2}" PKG
+    fi
+    [ -r "$PKG" ] || message_exit "package $1 not found"
+
+    PKGBASENAME=`basename $PKG`
+    PKGFULLNAME=${PKGBASENAME%.tar*}
+    PKGNAME=${PKGFULLNAME%%-[0-9]*}
+    PKGVERSION=${PKGFULLNAME##*-}
+
+    if ! [ -d "$PKGBUILDROOT" ]; then
+      if ! [ -d "$PKG" ]; then
+        message_start "extracting contents of $PKGBASENAME to $PKGBUILDROOT"
+        install_archives $BUILDROOT $PKG
+        message_end
+
+        fs_getfiles "$PATCHDIR/$ALIAS-$PKGVERSION*.patch" PATCHES
+        if [ -n "$PATCHES" ]; then
+          message_start "patching package sources"
+          build_patchdir $BUILDROOT $PATCHES
+          message_end
+        fi
+
+        if ! [ -d "$PKGBUILDROOT" ]; then
+          fs_getdirs "$BUILDROOT/$ALIAS*" PKGEXTRACTROOT
+          execute "mv $PKGEXTRACTROOT $PKGBUILDROOT"
+        fi
+      else
+        message_start "linking $PKG to $PKGBUILDROOT"
+        execute "ln -sf $PKG $PKGBUILDROOT"
+        message_end
+      fi
+    else
+      message_warn "contents of $PKGBASENAME found in $PKGBUILDROOT"
+    fi
+
+    message_start "descending into build directory"
+    SCRIPTROOT=`pwd`
+    execute "cd $PKGBUILDROOT"
+
+    [ -d "$BUILDDIR" ] || execute "mkdir -p $BUILDDIR"
+    execute "cd $BUILDDIR"
+    if ! true INSTALL; then
+      if [ "$CONFIGURE" != "" ]; then
+        message "configuring package sources"
+        execute "${CONFIGURE[@]}"
+      fi
+
+      if [ "$MAKEBUILD" != "" ]; then
+        message "compiling package sources ($COMMENT)"
+        execute "${MAKEBUILD[@]}"
+      fi
+    fi
+
+    if [ "$MAKEINSTALL" != "" ]; then
+      message "installing built package content"
+      execute "${MAKEINSTALL[@]}"
+    fi
+  
+    message_end "ascending from build directory"
+    execute "cd $SCRIPTROOT"
+
+    message_boldend "success, package $1 built"
+    shift
+  done
+
+  message_boldend "success, all packages built"
+}

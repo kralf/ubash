@@ -24,7 +24,7 @@
 function math_calc
 {
   EXPR="scale=0; ($1)/1"
-  eval $2=`echo $EXPR | bc`
+  define $2 `echo $EXPR | bc`
 }
 
 function math_inc

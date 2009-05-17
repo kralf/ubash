@@ -21,6 +21,10 @@
 
 # Global functions
 
+function define {
+  read $1 <<< $2
+}
+
 function defined {
   [ "${!1-X}" == "${!1-Y}" ]
 }
@@ -45,9 +49,11 @@ function include
   [ "$0" == "$INCSOURCE" ] && INCDIR=`pwd` || INCDIR=`dirname $INCSOURCE`
 
  while [ -n "$1" ]; do
-    if [ -e "$INCDIR/$1" ]; then
-      . "$INCDIR/$1"
-      INCLUDES=("$INCDIR/$1" ${INCLUDES[*]})
+    [[ "$1" =~ ^/ ]] && INCLUDE="$1" || INCLUDE="$INCDIR/$1"
+
+    if [ -r "$INCLUDE" ]; then
+      . "$INCLUDE"
+      INCLUDES=("$INCLUDE" ${INCLUDES[*]})
     else
       message_exit "missing include $1"
     fi
@@ -56,6 +62,7 @@ function include
   done
 }
 
+include "build.sh"
 include "execute.sh"
 include "fs.sh"
 include "install.sh"

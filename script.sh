@@ -135,7 +135,7 @@ function script_checkopts
 
   NUMOPTS=${#SCRIPTOPTTAGS[*]}
   for (( A=0; A < $NUMOPTS; A++ )); do
-    eval "${SCRIPTOPTVARS[A]}=\"${SCRIPTOPTDEFS[A]}\""
+    define ${SCRIPTOPTVARS[A]} ${SCRIPTOPTDEFS[A]}
   done
 
   RETVAL=0
@@ -153,10 +153,10 @@ function script_checkopts
 
         if [[ "$1" =~ $OPTTAG ]]; then
           if [[ "$OPTDEF" =~ ^true$|^false$|^yes$|^no$ ]]; then
-            eval $OPTVAR="true"
+            define $OPTVAR "true"
             MATCH="true"
           else
-            eval $OPTVAR="$2"
+            define $OPTVAR $2
             MATCH="true"
             shift
           fi
@@ -180,10 +180,10 @@ function script_checkopts
 
   if [ -n "$SCRIPTARGVAR" ]; then
     if [ ${#SCRIPTARGS[@]} != 0 ]; then
-      eval "$SCRIPTARGVAR=\"${SCRIPTARGS[@]}\""
+      define $SCRIPTARGVAR "${SCRIPTARGS[@]}"
     else
       if [ -n "$SCRIPTARGDEF" ]; then
-        eval "$SCRIPTARGVAR=\"$SCRIPTARGDEF\""
+        define $SCRIPTARGVAR "$SCRIPTARGDEF"
       else
         echo "missing argument(s): $SCRIPTARGVAR"
         RETVAL=1

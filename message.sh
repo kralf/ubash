@@ -90,7 +90,7 @@ function message_confirm
     read -s -n 1 CONFIRM
   done
 
-  [ "$CONFIRM" == "Y" ] && eval $2="true" || eval $2="false"
+  [ "$CONFIRM" == "Y" ] && define $2 "true" || define $2 "false"
 }
 
 function message_abort

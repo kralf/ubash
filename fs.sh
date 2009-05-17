@@ -65,16 +65,44 @@ function fs_checkdirwr
   message_end
 }
 
+function fs_getfiles
+{
+  unset FILES
+
+  for PATTERN in $(eval echo $1); do
+    DIRNAME=`dirname $PATTERN`
+    BASENAME=`basename $PATTERN`
+
+    FILES="$FILES `find $DIRNAME -name "$BASENAME" -type f`"
+  done 
+
+  define $2 "$FILES"
+}
+
 function fs_getfilesize
 {
   FILESIZE=(`du -hks $1 2> $NULL`)
-  eval $2=${FILESIZE[0]}
+  define $2 ${FILESIZE[0]}
+}
+
+function fs_getdirs
+{
+  unset DIRS
+
+  for PATTERN in $(eval echo $1); do
+    DIRNAME=`dirname $PATTERN`
+    BASENAME=`basename $PATTERN`
+
+    DIRS="$DIRS `find $DIRNAME -name "$BASENAME" -type d`"
+  done 
+
+  define $2 "$DIRS"
 }
 
 function fs_getdirsize
 {
   DIRSIZE=(`du -hks $1 2> $NULL`)
-  eval $2=${DIRSIZE[0]}
+  define $2 ${DIRSIZE[0]}
 }
 
 function fs_abspath
@@ -92,7 +120,7 @@ function fs_abspath
 
   [ -z "$ABSPATH" ] && message_warn "path to $1 is invalid"
 
-  eval $2=$ABSPATH
+  define $2 $ABSPATH
 }
 
 function fs_mkdirs

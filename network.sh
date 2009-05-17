@@ -40,7 +40,7 @@ function network_gethostip
 
   [ -z "$HOSTIP" ] && message_warn "failed to determine address of host $1"
 
-  eval $2=$HOSTIP
+  define $2 $HOSTIP
 }
 
 function network_upfiles
