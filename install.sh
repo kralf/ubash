@@ -186,19 +186,8 @@ function install_archives
   while [ -n "$1" ]; do
     message_start "installing archive $1"
 
-    case ${1##*.} in
-      tar) INSTOPTS="-xf"
-           ;;
-      bz2) INSTOPTS="-xjf"
-           ;;
-      gz)  INSTOPTS="-xzf"
-           ;;
-      tgz) INSTOPTS="-xzf"
-           ;;
-        *) message_exit "archive $1 has unsupported format"
-           ;;
-    esac
-    execute "tar $INSTOPTS $1 -C $ROOT"
+    archive_getfilter $1 FILTER
+    execute "tar -x${FILTER}f $1 -C $ROOT"
 
     message_end
     shift

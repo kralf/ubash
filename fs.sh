@@ -73,10 +73,10 @@ function fs_getfiles
     DIRNAME=`dirname $PATTERN`
     BASENAME=`basename $PATTERN`
 
-    FILES="$FILES `find $DIRNAME -name "$BASENAME" -type f`"
+    FILES="$FILES `find $DIRNAME -name "$BASENAME" -xtype f`"
   done 
 
-  define $2 "$FILES"
+  define $2 $FILES
 }
 
 function fs_getfilesize
@@ -93,10 +93,10 @@ function fs_getdirs
     DIRNAME=`dirname $PATTERN`
     BASENAME=`basename $PATTERN`
 
-    DIRS="$DIRS `find $DIRNAME -name "$BASENAME" -type d`"
+    DIRS="$DIRS `find $DIRNAME -name "$BASENAME" -xtype d`"
   done 
 
-  define $2 "$DIRS"
+  define $2 $DIRS
 }
 
 function fs_getdirsize

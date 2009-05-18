@@ -108,8 +108,8 @@ function build_packages
 
   BUILDROOT=$1
   shift
-  fs_abspath $1 ROOT
-  USRROOT="$ROOT/usr"
+  fs_abspath $1 EPREFIX
+  PREFIX="$EPREFIX/usr"
   shift
 
   HOST=$1
@@ -129,7 +129,7 @@ function build_packages
     ALIAS="$1"
     ADDONS=""
     BUILDDIR="."
-    CONFIGURE=("./configure --prefix=$USRROOT --exec-prefix=$ROOT")
+    CONFIGURE=("./configure --prefix=$PREFIX --exec-prefix=$EPREFIX")
     MAKEBUILD=("make $MAKEOPTS all")
     MAKEINSTALL=("make $MAKEOPTS install")
     COMMENT="this may take a while"
@@ -153,7 +153,7 @@ function build_packages
         install_archives $BUILDROOT $PKG
         message_end
 
-        fs_getfiles "$PATCHDIR/$ALIAS-$PKGVERSION*.patch" PATCHES
+        fs_getfiles "$PATCHDIR/$PKGNAME-$PKGVERSION*.patch" PATCHES
         if [ -n "$PATCHES" ]; then
           message_start "patching package sources"
           build_patchdir $BUILDROOT $PATCHES
@@ -161,7 +161,7 @@ function build_packages
         fi
 
         if ! [ -d "$PKGBUILDROOT" ]; then
-          fs_getdirs "$BUILDROOT/$ALIAS*" PKGEXTRACTROOT
+          fs_getdirs "$BUILDROOT/$PKGFULLNAME" PKGEXTRACTROOT
           execute "mv $PKGEXTRACTROOT $PKGBUILDROOT"
         fi
       else
