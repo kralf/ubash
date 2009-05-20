@@ -21,11 +21,36 @@
 
 # Install functions
 
+function install_dirs
+{
+  CPOPTS="-dR --preserve=mode,timestamps --remove-destination --parents"
+  
+  ROOT=$1
+  shift
+  message_start "installing directory content to $ROOT"
+
+  while [ -n "$1" ]; do
+    INSTDIRS="`find $1 -maxdepth 0 2> $NULL`"
+
+    for INSTDIR in $INSTDIRS; do
+      message_start "installing directory $INSTDIR"
+
+      execute "cp $CPOPTS $INSTDIR $ROOT"
+
+      message_end
+    done
+
+    shift
+  done
+
+  message_end "success, directory content installed"
+}
+
 function install_objects
 {
   ROOT=$1
   shift
-  message_start "copying objects to $ROOT"
+  message_start "installing objects to $ROOT"
 
   while [ -n "$1" ]; do
     OBJS=$1
@@ -34,7 +59,7 @@ function install_objects
 
     for OBJ in $OBJS; do
       if [ -e "$OBJ" ]; then
-        message_start "copying object $OBJ"
+        message_start "installing object $OBJ"
     
         CPOBJFILES="$OBJ=-L"
   
@@ -58,7 +83,7 @@ function install_objects
     shift
   done
 
-  message_end "success, objects copied"
+  message_end "success, objects installed"
 }
 
 function install_packages

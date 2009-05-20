@@ -183,7 +183,7 @@ function script_checkopts
       define $SCRIPTARGVAR ${SCRIPTARGS[@]}
     else
       if [ -n "$SCRIPTARGDEF" ]; then
-        define $SCRIPTARGVAR $SCRIPTARGDEF
+        define $SCRIPTARGVAR ${SCRIPTARGDEF[@]}
       else
         echo "missing argument(s): $SCRIPTARGVAR"
         RETVAL=1

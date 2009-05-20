@@ -26,7 +26,7 @@ function build_checktools
   TARGET=$1
   shift
 
-  message_start "checking the build tools"
+  message_start "checking the $TARGET build tools"
 
   while [ -n "$1" ]; do
     message_start "checking $1"
@@ -37,7 +37,7 @@ function build_checktools
     shift
   done
 
-  message_end "success, build tools seem to be okay"
+  message_end "success, $TARGET build tools seem to be working"
 }
 
 function build_setenv
@@ -69,8 +69,8 @@ function build_setenv
 function build_stripsyms {
   message_start "stripping symbols from all objects in $1"
 
-  execute "find $1 -name *.so -exec $STRIP -s {} ;"
-  execute "find $1 -perm /111 -exec $STRIP -s {} ;"
+  execute "find $1 -name '*.so' -exec $STRIP -s {} \;"
+  execute "find $1 -perm /111 -exec $STRIP -s {} \;"
 
   message_end
 }
@@ -121,31 +121,44 @@ function build_packages
   INSTALL=$1
   shift
 
+  ARCH="$TARGET"
+  [[ "$TARGET" =~ i[3-6]86 ]] && ARCH="i386"
+  [ "$TARGET" == "powerpc" ] && ARCH="ppc"
+
   message_boldstart "building packages"
 
   while [ -n "$1" ]; do
-    message_boldstart "building package $1"
+    keyval "$1" ALIAS VERSION
+    [ -z "$VERSION" ] && VERSION="[0-9]*"
+    message_boldstart "building package $ALIAS"
 
-    ALIAS="$1"
     ADDONS=""
+    PKG=""
+    PKGCONFFILE="$CONFDIR/$ALIAS.$SUFFIX"
+    PKGBUILDROOT="$BUILDROOT/$ALIAS"
+
+    [ -r "$PKGCONFFILE" ] && include "$PKGCONFFILE"
+    if [ -z "$PKG" ] || [ ! -r "$PKG" ]; then
+      fs_getdirs "$PKGDIR/$ALIAS-$VERSION" PKG
+    fi
+    if [ -z "$PKG" ] || [ ! -r "$PKG" ]; then
+      fs_getfiles "$PKGDIR/$ALIAS-$VERSION.{tar,tar.gz,tar.bz2}" PKG
+    fi
+    [ ${#PKG[@]} -gt 1 ] && message_exit "package $ALIAS has ambigius versions"
+    [ -r "$PKG" ] || message_exit "package $ALIAS not found"
+
+    PKGBASENAME=`basename $PKG`
+    PKGFULLNAME=${PKGBASENAME%.tar*}
+    PKGNAME=${PKGFULLNAME%%-[0-9]*}
+    PKGVERSION=${PKGFULLNAME#$PKGNAME-}
+
     BUILDDIR="."
     CONFIGURE=("./configure --prefix=$PREFIX --exec-prefix=$EPREFIX")
     MAKEBUILD=("make $MAKEOPTS all")
     MAKEINSTALL=("make $MAKEOPTS install")
     COMMENT="this may take a while"
-    PKG=""
-    PKGBUILDROOT=$BUILDROOT/$ALIAS
 
-    [ -r "$CONFDIR/$1.$SUFFIX" ] && include "$CONFDIR/$1.$SUFFIX"
-    if [ -z "$PKG" ] || [ ! -r "$PKG" ]; then
-      fs_getfiles "$PKGDIR/$ALIAS-[0-9]*.{tar,gz,tgz,bz2}" PKG
-    fi
-    [ -r "$PKG" ] || message_exit "package $1 not found"
-
-    PKGBASENAME=`basename $PKG`
-    PKGFULLNAME=${PKGBASENAME%.tar*}
-    PKGNAME=${PKGFULLNAME%%-[0-9]*}
-    PKGVERSION=${PKGFULLNAME##*-}
+    [ -r "$PKGCONFFILE" ] && include "$PKGCONFFILE"
 
     if ! [ -d "$PKGBUILDROOT" ]; then
       if ! [ -d "$PKG" ]; then
@@ -153,7 +166,7 @@ function build_packages
         install_archives $BUILDROOT $PKG
         message_end
 
-        fs_getfiles "$PATCHDIR/$PKGNAME-$PKGVERSION*.patch" PATCHES
+        fs_getfiles "$PATCHDIR/$PKGNAME-$PKGVERSION*.$SUFFIX.patch" PATCHES
         if [ -n "$PATCHES" ]; then
           message_start "patching package sources"
           build_patchdir $BUILDROOT $PATCHES
@@ -166,6 +179,7 @@ function build_packages
         fi
       else
         message_start "linking $PKG to $PKGBUILDROOT"
+        fs_abspath $PKG PKG
         execute "ln -sf $PKG $PKGBUILDROOT"
         message_end
       fi
@@ -199,7 +213,7 @@ function build_packages
     message_end "ascending from build directory"
     execute "cd $SCRIPTROOT"
 
-    message_boldend "success, package $1 built"
+    message_boldend "success, package $ALIAS built"
     shift
   done
 

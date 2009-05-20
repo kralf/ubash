@@ -24,8 +24,12 @@
 function define {
   VAR=$1
   shift
+  unset $VAR
 
-  read $VAR <<< $*
+  while [ -n "$1" ]; do
+    eval "$VAR=(\$$VAR $1)"
+    shift
+  done
 }
 
 function defined {

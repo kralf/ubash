@@ -73,15 +73,16 @@ function fs_getfiles
     DIRNAME=`dirname $PATTERN`
     BASENAME=`basename $PATTERN`
 
-    FILES="$FILES `find $DIRNAME -name "$BASENAME" -xtype f`"
+    FILES=($FILES "`find $DIRNAME -name "$BASENAME" -xtype f`")
   done 
 
-  define $2 $FILES
+  define $2 ${FILES[@]}
 }
 
 function fs_getfilesize
 {
   FILESIZE=(`du -hks $1 2> $NULL`)
+  [ -z "$FILESIZE" ] && FILESIZE="0"
   define $2 ${FILESIZE[0]}
 }
 
@@ -93,15 +94,16 @@ function fs_getdirs
     DIRNAME=`dirname $PATTERN`
     BASENAME=`basename $PATTERN`
 
-    DIRS="$DIRS `find $DIRNAME -name "$BASENAME" -xtype d`"
+    DIRS=($DIRS "`find $DIRNAME -name "$BASENAME" -xtype d`")
   done 
 
-  define $2 $DIRS
+  define $2 ${DIRS[@]}
 }
 
 function fs_getdirsize
 {
   DIRSIZE=(`du -hks $1 2> $NULL`)
+  [ -z "$DIRSIZE" ] && DIRSIZE="0"
   define $2 ${DIRSIZE[0]}
 }
 
@@ -178,10 +180,10 @@ function fs_rmdirs
   while [ -n "$1" ]; do
     RMDIR=`echo $1 | sed s/'^\/'//`
 
-    if ! [ -d "$ROOT/$RMDIR" ]; then
-      message_start "removing directory /$1"
+    if [ -d "$ROOT/$RMDIR" ]; then
+      message_start "removing directory /$RMDIR"
 
-      execute "rm -rf $ROOT/$1"
+      execute "rm -rf $ROOT/$RMDIR"
 
       message_end
     fi
@@ -201,7 +203,7 @@ function fs_rmfiles
   while [ -n "$1" ]; do
     message_start "removing file(s) $1"
 
-    execute "find $ROOT -name $1 -type f -exec rm -rf {} \;"
+    execute "find $ROOT -name $1 -xtype f -exec rm -rf {} \;"
 
     message_end
     shift
@@ -230,9 +232,10 @@ function fs_chowndirs
 
   while [ -n "$1" ]; do
     keyval "$1" CHOWNDIR CHOWNOWNER
-    message_start "changing ownership of $CHOWNDIR to $CHOWNOWNER"
+    CHOWNDIR=`echo $CHOWNDIR | sed s/'^\/'//`
+    message_start "changing ownership of /$CHOWNDIR to $CHOWNOWNER"
 
-    execute "chown -R $CHOWNOWNER $ROOT$CHOWNDIR"
+    execute "chown -R $CHOWNOWNER $ROOT/$CHOWNDIR"
 
     message_end
     shift
@@ -249,9 +252,10 @@ function fs_chmoddirs
 
   while [ -n "$1" ]; do
     keyval "$1" CHMODDIR CHMODPERM
-    message_start "changing permissions of $CHMODDIR to $CHMODPERM"
+    CHMODDIR=`echo $CHMODDIR | sed s/'^\/'//`
+    message_start "changing permissions of /$CHMODDIR to $CHMODPERM"
 
-    execute "find $ROOT$CHMODDIR -type d -exec chmod $CHMODPERM {} \;"
+    execute "find $ROOT/$CHMODDIR -xtype d -exec chmod $CHMODPERM {} \;"
 
     message_end
     shift
@@ -319,15 +323,17 @@ function fs_cpdevices
   ! [ -d "$ROOT/dev" ] && fs_mkdirs $ROOT /dev
   
   while [ -n "$1" ]; do
-    if [ -e "/dev/$1" ]; then
-      message_start "copying device(s) $1"
-
-      execute "cp -a --remove-destination /dev/$1 $ROOT/dev/$1"
-
-      message_end
-    else
-      message_warn "no such device(s) $1"
-    fi
+    for CPDEV in /dev/$1; do
+      if [ -e "$CPDEV" ]; then
+        message_start "copying device $CPDEV"
+  
+        execute "cp -a --remove-destination $CPDEV $ROOT$CPDEV"
+  
+        message_end
+      else
+        message_warn "no such device(s) $CPDEV"
+      fi
+    done
 
     shift
   done
@@ -357,48 +363,61 @@ function fs_wrfiles
 
 function fs_mountimg
 {
-  message_start "mounting filesystem image to $2"
+  MNTIMG=$1
+  MNTPOINT=$2
 
-  execute "mkdir -p $2"
-  execute "mount -o loop $1 $2"
+  message_start "mounting filesystem image to $MNTPOINT"
+
+  execute "mkdir -p $MNTPOINT"
+  execute "mount -o loop $MNTIMG $MNTPOINT"
 
   message_end
 }
 
 function fs_umountimg
 {
-  message_start "unmounting filesystem image from $2"
+  UMNTIMG=$1
+  UMNTPOINT=$2
 
-  execute "umount $2"
-  execute "rm -rf $2"
+  message_start "unmounting filesystem image from $UMNTPOINT"
+
+  execute "umount $UMNTIMG"
+  execute "rm -rf $UMNTPOINT"
 
   message_end
 }
 
 function fs_mkimg
 {
-  message_start "making filesystem image $1"
+  FSIMAGE=$1
+  FSROOT=$2
+  FSMOUNTPOINT=$3
+  FSTYPE=$4
+  FSBLOCKSIZE=$5
+  FSSPACE=$6
+
+  message_start "making filesystem image $FSIMAGE"
 
   message_start "evaluating image size"
-  fs_getdirsize $2 FSSIZE
-  math_calc "$FSSIZE*1.05+$6" FSSIZE
+  fs_getdirsize $FSROOT FSSIZE
+  math_calc "$FSSIZE*1.05+$FSSPACE" FSSIZE
   message_end
 
   message_start "writing zeroed image"
-  execute "dd if=/dev/zero of=$1 bs=1k count=$FSSIZE"
+  execute "dd if=/dev/zero of=$FSIMAGE bs=1k count=$FSSIZE"
   message_end
 
-  message_start "building $4 filesystem on image device"
-  execute "/sbin/mkfs -t $4 -F $1 -b $5"
+  message_start "building $FSTYPE filesystem on image device"
+  execute "/sbin/mkfs -t $FSTYPE -F $FSIMAGE -b $FSBLOCKSIZE"
   message_end
 
-  fs_mountimg $1 $3
+  fs_mountimg $FSIMAGE $FSMOUNTPOINT
 
   message_start "copying filesystem content to image"
-  execute "cp -a $2/* $3"
+  execute "cp -a $FSROOT/* $FSMOUNTPOINT"
   message_end
 
-  fs_umountimg $1 $3
+  fs_umountimg $FSIMAGE $FSMOUNTPOINT
 
   message_end "success, size of the filesystem image is ${FSSIZE}kB"
 }
