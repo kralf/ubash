@@ -19,66 +19,25 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
 
-# Global functions
+# Xen virtualization functions
 
-function define {
-  VAR=$1
-  shift
-  unset $VAR
-
-  while [ -n "$1" ]; do
-    eval "$VAR=(\$$VAR $1)"
-    shift
-  done
-}
-
-function defined {
-  [ "${!1-X}" == "${!1-Y}" ]
-}
-
-function true {
-  [ "${!1}" == "true" ] || [ "${!1}" == "yes" ]
-}
-
-function false {
-  [ "${!1}" != "true" ] && [ "${!1}" != "yes" ]
-}
-
-function keyval
+function xen_bootimg
 {
-  eval $2=`echo $1 | grep -o "^[^=]*"`
-  eval $3=`echo $1 | grep -o "=.*$" | sed s/"^="//`
+  DOMAINNAME=$1
+  DOMAINCFG=$2
+  KERNELIMG=$3
+  fs_abspath $4 ROOTFSIMG
+
+  message_start "booting kernel image $KERNELIMG"
+  if [ -e "$KERNELIMG" ]; then
+    message_start "creating domain $DOMAINNAME"
+
+    message "creating domain $1"
+    xm create -c $DOMAINCFG name=$DOMAINNAME kernel=$KERNELIMG \
+      disk=file:$ROOTFSIMG,hda1,w
+
+    [ $? != 0 ] && message "failed to create domain $DOMAINNAME"
+  else
+    exit_message "missing kernel image"
+  fi
 }
-
-function include
-{
-  INCSOURCE=${BASH_SOURCE[1]}
-  [ "$0" == "$INCSOURCE" ] && INCDIR=`pwd` || INCDIR=`dirname $INCSOURCE`
-
- while [ -n "$1" ]; do
-    [[ "$1" =~ ^/ ]] && INCLUDE="$1" || INCLUDE="$INCDIR/$1"
-
-    if [ -r "$INCLUDE" ]; then
-      . "$INCLUDE"
-      INCLUDES=("$INCLUDE" ${INCLUDES[*]})
-    else
-      message_exit "missing include $1"
-    fi
-
-    shift
-  done
-}
-
-include "archive.sh"
-include "build.sh"
-include "execute.sh"
-include "fs.sh"
-include "install.sh"
-include "log.sh"
-include "math.sh"
-include "message.sh"
-include "network.sh"
-include "script.sh"
-include "system.sh"
-include "test.sh"
-include "xen.sh"
