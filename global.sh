@@ -27,7 +27,7 @@ function define {
   unset $VAR
 
   while [ -n "$1" ]; do
-    eval "$VAR=(\$$VAR $1)"
+    eval "$VAR[\${#$VAR[*]}]=\"$1\""
     shift
   done
 }
