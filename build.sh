@@ -121,10 +121,6 @@ function build_packages
   INSTALL=$1
   shift
 
-  ARCH="$TARGET"
-  [[ "$TARGET" =~ i[3-6]86 ]] && ARCH="i386"
-  [ "$TARGET" == "powerpc" ] && ARCH="ppc"
-
   message_boldstart "building packages"
 
   while [ -n "$1" ]; do
@@ -153,6 +149,9 @@ function build_packages
     PKGVERSION=${PKGFULLNAME#$PKGNAME-}
 
     BUILDDIR="."
+    ARCH="$TARGET"
+    [[ "$TARGET" =~ i[3-6]86 ]] && ARCH="i386"
+    [ "$TARGET" == "powerpc" ] && ARCH="ppc"
     CONFIGURE=("./configure --prefix=$PREFIX --exec-prefix=$EPREFIX")
     MAKEBUILD=("make $MAKEOPTS all")
     MAKEINSTALL=("make $MAKEOPTS install")
