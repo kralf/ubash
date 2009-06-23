@@ -23,9 +23,12 @@
 
 function regexp_substfile
 {
+  EXPSEP="/"
+  [ -n "$4" ] && EXPSEP="$4"
+
   message_start "subsituting content in $1"
 
-  execute "sed -i s/\"$2\"/\"$3\"/ $1"
+  execute "sed -i s$EXPSEP\"$2\"$EXPSEP\"$3\"$EXPSEP $1"
 
   message_end "success, content substituted"
 }
