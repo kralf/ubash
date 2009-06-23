@@ -19,95 +19,13 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
 
-# Message functions
+# Install functions
 
-! defined STAGE && STAGE=0
-
-function message
+function regexp_substfile
 {
-  for (( S=0; S < $STAGE; S++ )); do
-    echo -n "    "
-  done
+  message_start "subsituting content in $1"
 
-  echo -n "|-> "
-  echo -e $1
-}
+  execute "sed -i s/\"$2\"/\"$3\"/ $1"
 
-function message_start
-{
-  message "$1"
-  message_stageup
-}
-
-function message_end
-{
-  message_stagedown
-  [ -n "$1" ] && message "$1"
-}
-
-function message_bold
-{
-  message "\033[1m$1\033[0m"
-}
-
-function message_boldstart
-{
-  message_bold "$1"
-  message_stageup
-}
-
-function message_boldend
-{
-  message_stagedown
-  [ -n "$1" ] && message_bold "$1"
-}
-
-function message_warn
-{
-  message "\033[33mwarning:\033[0m $1"
-}
-
-function message_exit
-{
-  message "\033[31merror:\033[0m $1"
-
-  STAGE=0
-  message "bailing out, see $LOGFILE for details"
-
-  [ -n "$SCRIPT" ] &&  exit 1
-}
-
-function message_confirm
-{
-  CONFIRM=""
-
-  message "\033[1mconfirm:\033[0m $1? [Y/n]"
-
-  while ! [[ "$CONFIRM" =~ [Yn] ]]; do
-    read -s -n 1 CONFIRM
-  done
-
-  [ "$CONFIRM" == "Y" ] && define $2 "true" || define $2 "false"
-}
-
-function message_abort
-{
-  message_confirm "$1, continue" RETVAL
-
-  if ! true RETVAL; then
-    STAGE=0
-    message "user abort"
-  
-    exit 2
-  fi
-}
-
-function message_stageup
-{
-  math_inc STAGE
-}
-
-function message_stagedown
-{
-  [[ $STAGE > 0 ]] && math_dec STAGE
+  message_end "success, content substituted"
 }

@@ -26,10 +26,14 @@ function define {
   shift
   unset $VAR
 
-  while [ -n "$1" ]; do
-    eval "$VAR[\${#$VAR[*]}]=\"$1\""
-    shift
-  done
+  if [ $# -gt 1 ]; then
+    while [ -n "$1" ]; do
+      eval "$VAR[\${#$VAR[*]}]=\"$1\""
+      shift
+    done
+  else
+    eval "$VAR=\"$1\""
+  fi
 }
 
 function defined {
@@ -78,6 +82,7 @@ include "log.sh"
 include "math.sh"
 include "message.sh"
 include "network.sh"
+include "regexp.sh"
 include "script.sh"
 include "system.sh"
 include "test.sh"

@@ -215,8 +215,10 @@ function script_run
   while [ -n "$1" ]; do
     message_start "executing script $1"
 
+    export STAGE
     "./$1"
-    [ $? != 0 ] && exit $?
+    RETVAL=$?
+    [ $RETVAL != 0 ] && exit $RETVAL
 
     message_end "success, script returned zero"
     shift

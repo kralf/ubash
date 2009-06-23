@@ -177,7 +177,7 @@ function install_template
 
 function install_svn
 {
-  CPOPTS="-dR --preserve=mode,timestamps --remove-destination --parents"
+  CPOPTS="-dRL --preserve=mode,timestamps --remove-destination --parents"
   FINDOPTS="-depth -name .svn -exec rm -rf '{}' \;"
   
   ROOT=$1

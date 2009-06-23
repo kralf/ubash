@@ -303,9 +303,10 @@ function fs_cpfiles
     message_start "copying file(s) $CPFILE"
 
     CPROOT=`echo $CPFILE | sed s/'[/?][^/]*$'// | sed s/'^\/'//`
+    CPWRFILE=`echo $CPFILE | sed s/'^\/'//`
     ! [ -d "$ROOT/$CPROOT" ] && fs_mkdirs $ROOT /$CPROOT
 
-    execute "cp $CPOPTS $CPFILEOPTS $CPFILE $ROOT/$CPFILE"
+    execute "cp $CPOPTS $CPFILEOPTS $CPFILE $ROOT/$CPWRFILE"
 
     message_end
     shift
