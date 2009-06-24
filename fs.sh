@@ -422,3 +422,21 @@ function fs_mkimg
 
   message_end "success, size of the filesystem image is ${FSSIZE}kB"
 }
+
+function fs_bind
+{
+  FSOLDDIR=$1
+  FSNEWDIR=$2
+
+  FSBOUND=`mount | grep "$2"`
+  if [ -z "$FSBOUND" ]; then
+    message_start "binding filesystem in $1 to $2"
+
+    [ -d "$2" ] || execute "mkdir -p $2"
+    execute "mount -t none -o bind $1 $2"
+
+    message_end
+  else
+    message "filesystem already bound to $2"
+  fi
+}
