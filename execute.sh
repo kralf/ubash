@@ -38,6 +38,23 @@ function execute
   true VERBOSE && message_end "success, all commands executed"
 }
 
+function execute_try
+{
+  true VERBOSE && message_start "executing commands"
+
+  while [ -n "$1" ]; do
+    true VERBOSE && message "trying to execute \"$1\""
+
+    log_command "$1"
+    eval "$1" >> $LOGFILE 2>&1
+
+    [ "$?" != 0 ] && message_warn "failed to execute command \"$1\""
+    shift
+  done
+
+  true VERBOSE && message_end "done, all commands executed"
+}
+
 function execute_if
 {
   EXECCOND=$1

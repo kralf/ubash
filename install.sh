@@ -46,8 +46,60 @@ function install_dirs
   message_end "success, directory content installed"
 }
 
+function install_files
+{
+  CPOPTS="-dR --preserve=mode,timestamps --remove-destination --parents"
+
+  ROOT=$1
+  shift
+  message_start "installing files to $ROOT"
+
+  while [ -n "$1" ]; do
+    message_start "installing file(s) $1"
+
+    execute "cp $CPOPTS $1 $ROOT"
+
+    message_end
+    shift
+  done
+
+  message_end "success, files installed"
+}
+
+function install_devices
+{
+  CPOPTS="-a --remove-destination --parents"
+
+  ROOT=$1
+  shift
+  message_start "installing devices to $ROOT/dev"
+
+  ! [ -d "$ROOT/dev" ] && fs_mkdirs $ROOT /dev
+  
+  while [ -n "$1" ]; do
+    for INSTDEV in /dev/$1; do
+      if [ -e "$INSTDEV" ]; then
+        message_start "installing device $INSTDEV"
+  
+        execute "cp $CPOPTS $INSTDEV $ROOT"
+  
+        message_end
+      else
+        message_warn "no such device(s) $INSTDEV"
+      fi
+    done
+
+    shift
+  done
+
+  message_end "success, devices installed"
+}
+
+
 function install_objects
 {
+  CPOPTS="-dRL --preserve=mode,timestamps --remove-destination --parents"
+
   ROOT=$1
   shift
   message_start "installing objects to $ROOT"
@@ -61,7 +113,7 @@ function install_objects
       if [ -e "$OBJ" ]; then
         message_start "installing object $OBJ"
     
-        CPOBJFILES="$OBJ=-L"
+        INSTOBJFILES="$OBJ"
   
         LIBS=`ldd $OBJ 2> $NULL | 
           sed s/'[[:space:]]*'// | 
@@ -69,10 +121,12 @@ function install_objects
           sed s/'[[:space:]]*(.*)'// | 
           sed s/'not a dynamic executable'//`
         for LIB in $LIBS; do
-          [ -e "$LIB" ] && CPOBJFILES="$CPOBJFILES $LIB=-L"
+          [ -e "$LIB" ] && INSTOBJFILES="$INSTOBJFILES $LIB"
         done
 
-        fs_cpfiles $ROOT $CPOBJFILES
+        for INSTOBJFILE in $INSTOBJFILES; do
+          execute "cp $CPOPTS $INSTOBJFILE $ROOT"
+        done
 
         message_end
       else

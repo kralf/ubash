@@ -266,7 +266,7 @@ function fs_chmoddirs
 
 function fs_cpdirs
 {
-  CPOPTS="-dR --preserve=mode,timestamps --remove-destination --parents"
+  CPOPTS="-dR --preserve=mode,timestamps --remove-destination"
 
   ROOT=$1
   shift
@@ -292,7 +292,7 @@ function fs_cpdirs
 
 function fs_cpfiles
 {
-  CPOPTS=""
+  CPOPTS="-dR --preserve=mode,timestamps --remove-destination"
 
   ROOT=$1
   shift
@@ -302,44 +302,13 @@ function fs_cpfiles
     keyval "$1" CPFILE CPFILEOPTS
     message_start "copying file(s) $CPFILE"
 
-    CPROOT=`echo $CPFILE | sed s/'[/?][^/]*$'// | sed s/'^\/'//`
-    CPWRFILE=`echo $CPFILE | sed s/'^\/'//`
-    ! [ -d "$ROOT/$CPROOT" ] && fs_mkdirs $ROOT /$CPROOT
-
-    execute "cp $CPOPTS $CPFILEOPTS $CPFILE $ROOT/$CPWRFILE"
+    execute "cp $CPOPTS $CPFILEOPTS $CPFILE $ROOT"
 
     message_end
     shift
   done
 
   message_end "success, files copied"
-}
-
-function fs_cpdevices
-{
-  ROOT=$1
-  shift
-  message_start "copying devices to $ROOT/dev"
-
-  ! [ -d "$ROOT/dev" ] && fs_mkdirs $ROOT /dev
-  
-  while [ -n "$1" ]; do
-    for CPDEV in /dev/$1; do
-      if [ -e "$CPDEV" ]; then
-        message_start "copying device $CPDEV"
-  
-        execute "cp -a --remove-destination $CPDEV $ROOT$CPDEV"
-  
-        message_end
-      else
-        message_warn "no such device(s) $CPDEV"
-      fi
-    done
-
-    shift
-  done
-
-  message_end "success, devices copied"
 }
 
 function fs_wrfiles
