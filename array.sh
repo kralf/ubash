@@ -21,6 +21,11 @@
 
 # Array functions
 
+function array_defined
+{
+  [ -n "`declare -p $1 2> $NULL | grep \"declare -a\"`" ]
+}
+
 function array_contains
 {
   eval ARRAY="(\"\${$1[@]}\")"

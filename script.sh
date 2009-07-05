@@ -26,36 +26,52 @@ CHARWIDTH=30
 SCRIPTMAINTAINER="ralf.kaestner@gmail.com"
 [ "$0" != "$SHELL" ] && SCRIPT=`basename $0` || unset SCRIPT
 unset SCRIPTDOC
+unset SCRIPTDSPVAR
 unset SCRIPTARGVAR
 unset SCRIPTARGDEF
 unset SCRIPTARGDOC
 
 SCRIPTOPTTAGS=("--help"
                "--verbose|-v"
+               "--configfile|-c"
                "--logfile")
 
 SCRIPTOPTVALS=(""
                ""
+               "FILE"
                "FILE")
 
 SCRIPTOPTVARS=("HELP"
                "VERBOSE"
+               "CONFIGFILE"
                "LOGFILE")
 
 SCRIPTOPTDEFS=("false"
                "false"
+               ""
                "`basename $0 .sh`.log")
 
 SCRIPTOPTDOCS=("display usage and exit"
                "generate verbose command output"
+               "optional configuration file"
                "temporary log file")
 
 function script_init
 {
   SCRIPTDOC=$1
-  SCRIPTARGVAR=$2
-  SCRIPTARGDEF=$3
-  SCRIPTARGDOC=$4
+  SCRIPTDSPVAR=$2
+  SCRIPTARGVAR=$3
+  SCRIPTARGDEF=$4
+  SCRIPTARGDOC=$5
+}
+
+function script_init_array
+{
+  SCRIPTDOC=$1
+  SCRIPTDSPVAR=$2
+  SCRIPTARGVAR=$3
+  SCRIPTARGDEF=("${*:4:$#-4}")
+  SCRIPTARGDOC="${*:$#}"
 }
 
 function script_print
@@ -74,12 +90,11 @@ function script_print
 
 function script_usage
 {
-  echo -n "usage: $SCRIPT [OPT1 OPT2 ...]"
+  echo -n "usage: $SCRIPT [OPT1 [OPT2 [...]]]"
 
   if [ -n "$SCRIPTARGVAR" ]; then
-    if [[ "$SCRIPTARGVAR" =~ n$ ]]; then
-      SCRIPTDSPVAR=`echo $SCRIPTARGVAR | sed s/n$//`
-      echo " [${SCRIPTDSPVAR}1 ${SCRIPTDSPVAR}2 ...]"
+    if array_defined SCRIPTARGDEF; then
+      echo " [${SCRIPTDSPVAR}1 [${SCRIPTDSPVAR}2 [...]]]"
     else
       echo " [${SCRIPTARGVAR}]"
     fi
@@ -90,8 +105,7 @@ function script_usage
   [ -n "$SCRIPTDOC" ] && echo -e "\033[1m$SCRIPTDOC\033[0m"
 
   if [ -n "$SCRIPTARGVAR" ]; then
-    if [[ "$SCRIPTARGVAR" =~ n$ ]]; then
-      SCRIPTDSPVAR=`echo $SCRIPTARGVAR | sed s/n$//`
+    if array_defined SCRIPTARGDEF; then
       script_print "${SCRIPTDSPVAR}1 ${SCRIPTDSPVAR}2 ..." "$SCRIPTARGDOC"
     else
       script_print "${SCRIPTARGVAR}" "$SCRIPTARGDOC"
@@ -175,9 +189,6 @@ function script_checkopts
     shift
   done
 
-  fs_abspath $LOGFILE LOGFILE
-  log_clean
-
   if [ -n "$SCRIPTARGVAR" ]; then
     if [ ${#SCRIPTARGS[@]} != 0 ]; then
       define $SCRIPTARGVAR "${SCRIPTARGS[@]}"
@@ -196,6 +207,14 @@ function script_checkopts
     script_usage
     exit $RETVAL
   fi
+
+  if [ -r "$CONFIGFILE" ]; then
+    fs_abspath $CONFIGFILE CONFIGFILE
+    include $CONFIGFILE
+  fi
+
+  fs_abspath $LOGFILE LOGFILE
+  log_clean
 }
 
 function script_checkroot
