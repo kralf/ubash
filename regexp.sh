@@ -21,6 +21,11 @@
 
 # Install functions
 
+function regexp_matchfile
+{
+  [ -r "$1" ] && [ -n "`grep \"$2\" $1`" ]
+}
+
 function regexp_substfile
 {
   EXPSEP="/"

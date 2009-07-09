@@ -25,12 +25,14 @@
 
 function message
 {
-  for (( S=0; S < $STAGE; S++ )); do
-    echo -n "    "
-  done
-
-  echo -n "|-> "
-  echo -e $1
+  if false QUIET; then
+    for (( S=0; S < $STAGE; S++ )); do
+      echo -n "    "
+    done
+  
+    echo -n "|-> "
+    echo -e $1
+  fi
 }
 
 function message_start

@@ -33,26 +33,31 @@ unset SCRIPTARGDOC
 
 SCRIPTOPTTAGS=("--help"
                "--verbose|-v"
+               "--quiet|-q"
                "--configfile|-c"
                "--logfile")
 
 SCRIPTOPTVALS=(""
                ""
+               ""
                "FILE"
                "FILE")
 
-SCRIPTOPTVARS=("HELP"
-               "VERBOSE"
-               "CONFIGFILE"
-               "LOGFILE")
+SCRIPTOPTVARS=(HELP
+               VERBOSE
+               QUIET
+               CONFIGFILE
+               LOGFILE)
 
 SCRIPTOPTDEFS=("false"
+               "false"
                "false"
                ""
                "`basename $0 .sh`.log")
 
 SCRIPTOPTDOCS=("display usage and exit"
                "generate verbose command output"
+               "do not generate any output"
                "optional configuration file"
                "temporary log file")
 

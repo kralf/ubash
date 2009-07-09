@@ -68,12 +68,14 @@ function fs_checkdirwr
 function fs_getfiles
 {
   unset FILES
+  FINDOPTS="-mindepth 1 -maxdepth 1 -xtype f"
 
   for PATTERN in $(eval echo $1); do
     DIRNAME=`dirname $PATTERN`
     BASENAME=`basename $PATTERN`
 
-    FILES[${#FILES[*]}]="`find $DIRNAME -name "$BASENAME" -xtype f`"
+    FILES[${#FILES[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\" \
+      -printf \"%P\n\"`"
   done 
 
   define $2 ${FILES[@]}
@@ -89,12 +91,14 @@ function fs_getfilesize
 function fs_getdirs
 {
   unset DIRS
+  FINDOPTS="-mindepth 1 -maxdepth 1 -xtype d"
 
   for PATTERN in $(eval echo $1); do
     DIRNAME=`dirname $PATTERN`
     BASENAME=`basename $PATTERN`
 
-    DIRS[${#DIRS[*]}]="`find $DIRNAME -name "$BASENAME" -xtype d`"
+    DIRS[${#DIRS[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\" \
+      -printf \"%P\n\"`"
   done 
 
   define $2 ${DIRS[@]}
@@ -111,13 +115,14 @@ function fs_abspath
 {
   unset ABSPATH
 
-  if [ -d "`dirname $1`" ]; then
-    ABSPWD=`pwd`
-    cd `dirname $1`
-
-    eval ABSPATH=`pwd`/`basename $1`
-
-    cd $ABSPWD
+  if [ -d "$1" ]; then
+    pushd $1 > $NULL
+    ABSPATH="`pwd`"
+    popd > $NULL
+  elif [ -d "`dirname $1`" ]; then
+    pushd `dirname $1` > $NULL
+    ABSPATH="`pwd`/`basename $1`"
+    popd > $NULL
   fi
 
   [ -z "$ABSPATH" ] && message_warn "path to $1 is invalid"

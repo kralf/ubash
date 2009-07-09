@@ -19,46 +19,14 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
 
-# Archive functions
+# Array functions
 
-function archive_getfilter
+function string_toupper
 {
-  case ${1##*.} in
-    tar) FILTER=""
-          ;;
-    bz2) FILTER="j"
-          ;;
-    gz)  FILTER="z"
-          ;;
-    tgz) FILTER="z"
-          ;;
-      *) message_exit "archive $1 has unsupported format"
-          ;;
-  esac
-
-  define $2 $FILTER
+  define $1 "`eval echo \\\$$1 | tr \"[:lower:]\" \"[:upper:]\"`"
 }
 
-function archive_getcontents
+function string_tolower
 {
-  archive_getfilter $1 FILTER
-  CONTENTS=(`tar -t${FILTER}f $1`)
-
-  define $2 $CONTENTS
-}
-
-function archive_create
-{
-  ARCHIVE=$1
-  shift
-  ARCHIVEOPTS=$1
-  shift
-  message_start "creating archive `basename $ARCHIVE`"
-
-  archive_getfilter $ARCHIVE FILTER
-  [ -d "`dirname $ARCHIVE`" ] || execute "mkdir -p \"`dirname $ARCHIVE`\""
-  execute "tar $ARCHIVEOPTS -c${FILTER}f $ARCHIVE $*"
-
-  fs_getfilesize $ARCHIVE ARCHIVESIZE
-  message_end "success, size of the archive is ${ARCHIVESIZE}kB"
+  define $1 "`eval echo \\\$$1 | tr \"[:upper:]\" \"[:lower:]\"`"
 }

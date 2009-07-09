@@ -73,6 +73,7 @@ function include
   done
 }
 
+include "system.sh"
 include "archive.sh"
 include "array.sh"
 include "build.sh"
@@ -85,6 +86,6 @@ include "message.sh"
 include "network.sh"
 include "regexp.sh"
 include "script.sh"
-include "system.sh"
+include "string.sh"
 include "test.sh"
 include "xen.sh"
