@@ -64,10 +64,18 @@ SCRIPTOPTDOCS=("display usage and exit"
 function script_init
 {
   SCRIPTDOC=$1
-  SCRIPTDSPVAR=$2
-  SCRIPTARGVAR=$3
-  SCRIPTARGDEF=$4
-  SCRIPTARGDOC=$5
+  shift
+
+  while [ -n "$1" ]; do
+    SCRIPTDSPVAR[${#SCRIPTDSPVAR[*]}]=$1
+    shift
+    SCRIPTARGVAR[${#SCRIPTARGVAR[*]}]=$1
+    shift
+    SCRIPTARGDEF[${#SCRIPTARGDEF[*]}]=$1
+    shift
+    SCRIPTARGDOC[${#SCRIPTARGDOC[*]}]=$1
+    shift
+  done
 }
 
 function script_init_array
@@ -97,29 +105,37 @@ function script_usage
 {
   echo -n "usage: $SCRIPT [OPT1 [OPT2 [...]]]"
 
-  if [ -n "$SCRIPTARGVAR" ]; then
-    if array_defined SCRIPTARGDEF; then
-      echo " [${SCRIPTDSPVAR}1 [${SCRIPTDSPVAR}2 [...]]]"
-    else
-      echo " [${SCRIPTARGVAR}]"
-    fi
-  else
-    echo ""
+  if array_defined SCRIPTDSPVAR; then
+    for (( A=0; A < ${#SCRIPTDSPVAR[*]}; A++ )); do
+      if [ -z "${SCRIPTARGDEF[$A]}" ]; then
+        echo -n " ${SCRIPTDSPVAR[$A]}"
+      else
+        echo -n " [${SCRIPTDSPVAR[$A]}]"
+      fi
+    done
+  elif array_defined SCRIPTARGDEF; then
+    echo -n " [${SCRIPTDSPVAR}1 [${SCRIPTDSPVAR}2 [...]]]"
   fi
+  echo
 
   [ -n "$SCRIPTDOC" ] && echo -e "\033[1m$SCRIPTDOC\033[0m"
 
-  if [ -n "$SCRIPTARGVAR" ]; then
-    if array_defined SCRIPTARGDEF; then
-      script_print "${SCRIPTDSPVAR}1 ${SCRIPTDSPVAR}2 ..." "$SCRIPTARGDOC"
-    else
-      script_print "${SCRIPTARGVAR}" "$SCRIPTARGDOC"
-    fi
+  if array_defined SCRIPTDSPVAR; then
+    for (( A=0; A < ${#SCRIPTDSPVAR[*]}; A++ )); do
+      if [ -z "${SCRIPTARGDEF[$A]}" ]; then
+        script_print "${SCRIPTDSPVAR[$A]}" "${SCRIPTARGDOC[$A]}"
+      else
+        script_print "${SCRIPTDSPVAR[$A]}" \
+          "${SCRIPTARGDOC[$A]} [${SCRIPTARGDEF[$A]}]"
+      fi
+    done
+  elif array_defined SCRIPTARGDEF; then
+    script_print "${SCRIPTDSPVAR}1 ${SCRIPTDSPVAR}2 ..." "$SCRIPTARGDOC"
   fi
 
   script_print "OPT1 OPT2 ..." "list of options as given below [default]"
 
-  for (( A=0; A < ${#SCRIPTOPTTAGS[@]}; A++ )); do
+  for (( A=0; A < ${#SCRIPTOPTTAGS[*]}; A++ )); do
     OPTTAG=${SCRIPTOPTTAGS[A]}
     OPTTAG=${OPTTAG//"|"/", "}
     OPTVAL=${SCRIPTOPTVALS[A]}
@@ -194,19 +210,19 @@ function script_checkopts
     shift
   done
 
-  if [ -n "$SCRIPTARGVAR" ]; then
-    if [ ${#SCRIPTARGS[@]} != 0 ]; then
-      define $SCRIPTARGVAR "${SCRIPTARGS[@]}"
+  for (( A=0; A < ${#SCRIPTDSPVAR[*]}; A++ )); do
+    if [ $A -lt ${#SCRIPTARGS[*]} ]; then
+      define ${SCRIPTARGVAR[$A]} "${SCRIPTARGS[$A]}"
     else
-      if [ -n "$SCRIPTARGDEF" ]; then
-        define $SCRIPTARGVAR "${SCRIPTARGDEF[@]}"
+      if [ -n "${SCRIPTARGDEF[$A]}" ]; then
+        define ${SCRIPTARGVAR[$A]} "${SCRIPTARGDEF[$A]}"
       else
-        echo "missing argument(s): $SCRIPTARGVAR"
+        echo "missing argument: ${SCRIPTDSPVAR[$A]}"
         RETVAL=1
         HELP="true"
       fi
     fi
-  fi
+  done
 
   if true HELP; then
     script_usage
