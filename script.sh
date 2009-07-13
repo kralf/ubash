@@ -170,7 +170,7 @@ function script_checkopts
         OPTDEF=${SCRIPTOPTDEFS[A]}
         OPTDOC=${SCRIPTOPTDOCS[A]}
 
-        if [[ "$1" =~ $OPTTAG ]]; then
+        if [[ "$1" =~ ^$OPTTAG$ ]]; then
           if [[ "$OPTDEF" =~ ^true$|^false$|^yes$|^no$ ]]; then
             define $OPTVAR "true"
             MATCH="true"
