@@ -74,7 +74,7 @@ function fs_getfiles
     DIRNAME=`dirname $PATTERN`
     BASENAME=`basename $PATTERN`
 
-    FILES[${#FILES[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\"`"
+    FILES[${#FILES[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\" 2> $NULL`"
   done 
 
   define $2 ${FILES[@]}
@@ -96,7 +96,7 @@ function fs_getdirs
     DIRNAME=`dirname $PATTERN`
     BASENAME=`basename $PATTERN`
 
-    DIRS[${#DIRS[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\"`"
+    DIRS[${#DIRS[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\" 2> $NULL`"
   done 
 
   define $2 ${DIRS[@]}

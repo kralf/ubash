@@ -22,7 +22,6 @@
 # Log settings
 
 ! defined LOGILE && fs_abspath "`basename $0 .sh`.log" LOGFILE
-VERBOSE="false"
 
 function log_command
 {
