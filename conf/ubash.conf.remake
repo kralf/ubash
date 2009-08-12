@@ -1,0 +1,7 @@
+# This configuration file is part of ${REMAKE_PROJECT_NAME}
+# Version: ${REMAKE_PROJECT_VERSION}
+# Release: ${REMAKE_PROJECT_RELEASE}
+#
+# ${UBASH_CONFIGURATION_DESTINATION}/ubash/ubash.conf - uBash configuration
+
+UBASH_PATH=${CMAKE_INSTALL_PREFIX}/${UBASH_LIBRARY_DESTINATION}/ubash
