@@ -210,19 +210,27 @@ function script_checkopts
     shift
   done
 
-  for (( A=0; A < ${#SCRIPTDSPVAR[*]}; A++ )); do
-    if [ $A -lt ${#SCRIPTARGS[*]} ]; then
-      define ${SCRIPTARGVAR[$A]} "${SCRIPTARGS[$A]}"
+  if array_defined SCRIPTARGDEF; then
+    if [ ${#SCRIPTARGS[*]} -gt 0 ]; then
+      define $SCRIPTARGVAR ${SCRIPTARGS[*]}
     else
-      if [ -n "${SCRIPTARGDEF[$A]}" ]; then
-        define ${SCRIPTARGVAR[$A]} "${SCRIPTARGDEF[$A]}"
-      else
-        echo "missing argument: ${SCRIPTDSPVAR[$A]}"
-        RETVAL=1
-        HELP="true"
-      fi
+      define $SCRIPTARGVAR ${SCRIPTARGDEF[*]}
     fi
-  done
+  else
+    for (( A=0; A < ${#SCRIPTDSPVAR[*]}; A++ )); do
+      if [ $A -lt ${#SCRIPTARGS[*]} ]; then
+        define ${SCRIPTARGVAR[$A]} "${SCRIPTARGS[$A]}"
+      else
+        if [ -n "${SCRIPTARGDEF[$A]}" ]; then
+          define ${SCRIPTARGVAR[$A]} "${SCRIPTARGDEF[$A]}"
+        else
+          echo "missing argument: ${SCRIPTDSPVAR[$A]}"
+          RETVAL=1
+          HELP="true"
+        fi
+      fi
+    done
+  fi
 
   if true HELP; then
     script_usage

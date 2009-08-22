@@ -28,11 +28,24 @@ function array_defined
 
 function array_contains
 {
-  eval ARRAY="(\"\${$1[@]}\")"
+  eval ARRAY="(\"\${$1[*]}\")"
 
   for (( I=0; I < ${#ARRAY[*]}; I++ )); do
     [ "${ARRAY[$I]}" == "$2" ] && return 0
   done
 
   return 1
+}
+
+function array_copy
+{
+  DSTARRAY=$1
+  SRCARRAY=$2
+
+  eval "SRCSIZE=\${#$SRCARRAY[*]}"
+  eval "unset $DSTARRAY"
+
+  for (( I=0; I < $SRCSIZE; I++ )); do
+    eval "$DSTARRAY[\${#$DSTARRAY[*]}]=\"\${$SRCARRAY[$I]}\""
+  done
 }

@@ -24,12 +24,17 @@
 function execute
 {
   true VERBOSE && message_start "executing commands"
+  unset STDOUT
 
   while [ -n "$1" ]; do
     true VERBOSE && message "executing \"$1\""
 
     log_command "$1"
-    eval "$1" >> $LOGFILE 2>&1
+    LINES=`eval "$1" 2>> $LOGFILE | tee -a $LOGFILE`
+
+    while read LINE; do
+      STDOUT[${#STDOUT[*]}]="$LINE"
+    done <<< "$LINES"
 
     [ "$?" != 0 ] && message_exit "failed to execute command \"$1\""
     shift
@@ -55,6 +60,16 @@ function execute_try
   true VERBOSE && message_end "done, all commands executed"
 }
 
+function execute_stdout
+{
+  EXECSTDOUT=$1
+  shift
+
+  execute "$*"
+
+  array_copy $EXECSTDOUT STDOUT
+}
+
 function execute_if
 {
   EXECCOND=$1
@@ -69,12 +84,17 @@ function execute_root
   shift
 
   true VERBOSE && message_start "executing commands in $ROOT"
+  unset STDOUT
 
   while [ -n "$1" ]; do
     true VERBOSE && message "executing \"$1\""
 
     log_command "$1"
-    chroot $ROOT sh -l -c "$1" >> $LOGFILE 2>&1
+    LINES=`chroot $ROOT sh -l -c "$1" 2>> $LOGFILE | tee -a $LOGFILE`
+
+    while read LINE; do
+      STDOUT[${#STDOUT[*]}]="$LINE"
+    done <<< "$LINES"
 
     [ "$?" != 0 ] && message_exit "failed to execute command \"$1\""
     shift

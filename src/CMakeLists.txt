@@ -1,2 +1,1 @@
-add_subdirectory(bin)
-add_subdirectory(lib)
+remake_add_directories()
