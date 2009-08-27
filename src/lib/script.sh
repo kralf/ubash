@@ -210,13 +210,7 @@ function script_checkopts
     shift
   done
 
-  if array_defined SCRIPTARGDEF; then
-    if [ ${#SCRIPTARGS[*]} -gt 0 ]; then
-      define $SCRIPTARGVAR ${SCRIPTARGS[*]}
-    else
-      define $SCRIPTARGVAR ${SCRIPTARGDEF[*]}
-    fi
-  else
+  if array_defined SCRIPTDSPVAR; then
     for (( A=0; A < ${#SCRIPTDSPVAR[*]}; A++ )); do
       if [ $A -lt ${#SCRIPTARGS[*]} ]; then
         define ${SCRIPTARGVAR[$A]} "${SCRIPTARGS[$A]}"
@@ -230,6 +224,12 @@ function script_checkopts
         fi
       fi
     done
+  else
+    if [ ${#SCRIPTARGS[*]} -gt 0 ]; then
+      define $SCRIPTARGVAR ${SCRIPTARGS[*]}
+    else
+      define $SCRIPTARGVAR ${SCRIPTARGDEF[*]}
+    fi
   fi
 
   if true HELP; then
