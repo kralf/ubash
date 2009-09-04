@@ -4,13 +4,13 @@ include(ReMake)
 
 remake_project(
   uBash
-  0.1
-  beta
-  "A collection of useful bash scripts spanning a growing area of applications."
-  "Ralf Kaestner"
-  "ralf.kaestner@gmail.com"
-  "http://aslforge.ethz.ch/projects/ubash"
-  "GNU Lesser General Public License (LGPL)"
+  VERSION 0.1
+  RELEASE beta
+  SUMMARY "A collection of useful bash scripts spanning a growing area of applications."
+  AUTHOR "Ralf Kaestner"
+  CONTACT "ralf.kaestner@gmail.com"
+  HOME "http://aslforge.ethz.ch/projects/ubash"
+  LICENSE "GNU Lesser General Public License (LGPL)"
   INSTALL /usr
 )
 
