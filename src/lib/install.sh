@@ -180,10 +180,10 @@ function install_packages
       APTCMD="$APTENV $APTGET install $APTOPTS $DPKGOPTS $PKGNAME"
       APTINPUT=`echo $PKGARGS | grep -o "\[.*\]" | sed s/"\["// | sed s/"\]"//`
       if [ -n "$APTINPUT" ]; then
-        export "DEBIAN_FRONTEND=teletype"
         APTCMD="echo $APTINPUT | sed s/':'/'\n'/g | $APTCMD"
+        APTCMD="export DEBIAN_FRONTEND=teletype && $APTCMD"
       else
-        export "DEBIAN_FRONTEND=noninteractive"
+        APTCMD="export DEBIAN_FRONTEND=noninteractive && $APTCMD"
       fi
 
       if [[ "$PKGARGS" =~ verbose ]]; then
