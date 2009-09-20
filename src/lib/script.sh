@@ -255,24 +255,21 @@ function script_run
 {
   SCRIPTDIR=$1
   shift
-  message_start "running scripts in $SCRIPTDIR"
 
-  SCRIPTPWD=`pwd`
-  execute "cd $SCRIPTDIR"
+  message_start "running scripts in $SCRIPTDIR"
+  SCRIPTROOT=`pwd`
 
   while [ -n "$1" ]; do
     message_start "executing script $1"
 
     export STAGE
-    "./$1"
+    cd $SCRIPTDIR && ./$1 && cd $SCRIPTROOT
     RETVAL=$?
     [ $RETVAL != 0 ] && exit $RETVAL
 
     message_end "success, script returned zero"
     shift
   done
-
-  execute "cd $SCRIPTPWD"
 
   message_end "success, all scripts executed"
 }

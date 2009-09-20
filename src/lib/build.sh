@@ -140,7 +140,7 @@ function build_packages
     if [ -z "$PKG" ] || [ ! -r "$PKG" ]; then
       fs_getfiles "$PKGDIR/$ALIAS-$VERSION.{tar,tar.gz,tar.bz2}" PKG
     fi
-    [ ${#PKG[@]} -gt 1 ] && message_exit "package $ALIAS has ambigius versions"
+    [ ${#PKG[*]} -gt 1 ] && message_exit "package $ALIAS has ambigius versions"
     [ -r "$PKG" ] || message_exit "package $ALIAS not found"
 
     PKGBASENAME=`basename $PKG`
@@ -168,7 +168,7 @@ function build_packages
         fs_getfiles "$PATCHDIR/$PKGNAME-$PKGVERSION*.$SUFFIX.patch" PATCHES
         if [ -n "$PATCHES" ]; then
           message_start "patching package sources"
-          build_patchdir $BUILDROOT ${PATCHES[@]}
+          build_patchdir $BUILDROOT ${PATCHES[*]}
           message_end
         fi
 
@@ -187,30 +187,27 @@ function build_packages
     fi
 
     message_start "descending into build directory"
-    SCRIPTROOT=`pwd`
-    execute "cd $PKGBUILDROOT"
+    [ -d "$PKGBUILDROOT/$BUILDDIR" ] || \
+      execute "mkdir -p $PKGBUILDROOT/$BUILDDIR"
 
-    [ -d "$BUILDDIR" ] || execute "mkdir -p $BUILDDIR"
-    execute "cd $BUILDDIR"
     if ! true INSTALL; then
       if [ "$CONFIGURE" != "" ]; then
         message "configuring package sources"
-        execute "${CONFIGURE[@]}"
+        execute "cd $PKGBUILDROOT/$BUILDDIR && ${CONFIGURE[*]}"
       fi
 
       if [ "$MAKEBUILD" != "" ]; then
         message "compiling package sources ($COMMENT)"
-        execute "${MAKEBUILD[@]}"
+        execute "cd $PKGBUILDROOT/$BUILDDIR && ${MAKEBUILD[*]}"
       fi
     fi
 
     if [ "$MAKEINSTALL" != "" ]; then
       message "installing built package content"
-      execute "${MAKEINSTALL[@]}"
+      execute "cd $PKGBUILDROOT/$BUILDDIR && ${MAKEINSTALL[*]}"
     fi
   
     message_end "ascending from build directory"
-    execute "cd $SCRIPTROOT"
 
     message_boldend "success, package $ALIAS built"
     shift

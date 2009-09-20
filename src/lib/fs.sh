@@ -77,7 +77,7 @@ function fs_getfiles
     FILES[${#FILES[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\" 2> $NULL`"
   done 
 
-  define $2 ${FILES[@]}
+  define $2 ${FILES[*]}
 }
 
 function fs_getfilesize
@@ -99,7 +99,7 @@ function fs_getdirs
     DIRS[${#DIRS[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\" 2> $NULL`"
   done 
 
-  define $2 ${DIRS[@]}
+  define $2 ${DIRS[*]}
 }
 
 function fs_getdirsize
