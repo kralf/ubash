@@ -178,13 +178,7 @@ function install_packages
       fi
 
       APTCMD="$APTENV $APTGET install $APTOPTS $DPKGOPTS $PKGNAME"
-      APTINPUT=`echo $PKGARGS | grep -o "\[.*\]" | sed s/"\["// | sed s/"\]"//`
-      if [ -n "$APTINPUT" ]; then
-        APTCMD="echo $APTINPUT | sed s/':'/'\n'/g | $APTCMD"
-        APTCMD="export DEBIAN_FRONTEND=teletype && $APTCMD"
-      else
-        APTCMD="export DEBIAN_FRONTEND=noninteractive && $APTCMD"
-      fi
+      APTCMD="export DEBIAN_FRONTEND=noninteractive && $APTCMD"
 
       if [[ "$PKGARGS" =~ verbose ]]; then
         [ -x "$ROOT$APTGET" ] && eval "chroot $ROOT sh -l -c \"$APTCMD\""
