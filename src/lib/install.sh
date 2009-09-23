@@ -178,6 +178,7 @@ function install_packages
       fi
 
       APTCMD="$APTENV $APTGET install $APTOPTS $DPKGOPTS $PKGNAME"
+      APTCMD="export UCF_FORCE_CONFFNEW=yes && $APTCMD"
       APTCMD="export DEBIAN_FRONTEND=noninteractive && $APTCMD"
 
       if [[ "$PKGARGS" =~ verbose ]]; then
