@@ -24,7 +24,7 @@
 function install_dirs
 {
   CPOPTS="-dR --preserve=mode,timestamps --remove-destination --parents"
-  
+
   ROOT=$1
   shift
   message_start "installing directory content to $ROOT"
@@ -75,14 +75,14 @@ function install_devices
   message_start "installing devices to $ROOT/dev"
 
   ! [ -d "$ROOT/dev" ] && fs_mkdirs $ROOT /dev
-  
+
   while [ -n "$1" ]; do
     for INSTDEV in /dev/$1; do
       if [ -e "$INSTDEV" ]; then
         message_start "installing device $INSTDEV"
-  
+
         execute "cp $CPOPTS $INSTDEV $ROOT"
-  
+
         message_end
       else
         message_warn "no such device(s) $INSTDEV"
@@ -112,13 +112,13 @@ function install_objects
     for OBJ in $OBJS; do
       if [ -e "$OBJ" ]; then
         message_start "installing object $OBJ"
-    
+
         INSTOBJFILES="$OBJ"
-  
-        LIBS=`ldd $OBJ 2> $NULL | 
-          sed s/'[[:space:]]*'// | 
+
+        LIBS=`ldd $OBJ 2> $NULL |
+          sed s/'[[:space:]]*'// |
           sed s/'.*=>[[:space:]]*'// |
-          sed s/'[[:space:]]*(.*)'// | 
+          sed s/'[[:space:]]*(.*)'// |
           sed s/'not a dynamic executable'//`
         for LIB in $LIBS; do
           [ -e "$LIB" ] && INSTOBJFILES="$INSTOBJFILES $LIB"
@@ -160,7 +160,7 @@ function install_packages
       DPKGOPTS=""
 
       if ! [ -x "$ROOT$APTGET" ]; then
-        abs_path ./cache
+        fs_abspath ./cache ABSPATH
         DPKGCACHE=$ABSPATH
 
         if ! [ -d "$DPKGCACHE" ]; then
@@ -188,7 +188,7 @@ function install_packages
         [ -x "$ROOT$APTGET" ] && execute_root $ROOT "$APTCMD"
         [ -x "$ROOT$APTGET" ] || execute "$APTCMD"
       fi
-    
+
       [ $? != 0 ] && message_exit "failed to install package $PKGNAME"
     else
       message "package $PKGNAME is already installed"
@@ -228,7 +228,7 @@ function install_svn
 {
   CPOPTS="-dRL --preserve=mode,timestamps --remove-destination --parents"
   FINDOPTS="-depth -name .svn -exec rm -rf '{}' \;"
-  
+
   ROOT=$1
   shift
   message_start "installing svn content to $ROOT"
