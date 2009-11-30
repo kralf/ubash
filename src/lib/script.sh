@@ -228,7 +228,9 @@ function script_checkopts
     if [ ${#SCRIPTARGS[*]} -gt 0 ]; then
       define $SCRIPTARGVAR ${SCRIPTARGS[*]}
     else
-      define $SCRIPTARGVAR ${SCRIPTARGDEF[*]}
+      if [ ${#SCRIPTARGDEF[*]} -gt 0 ]; then
+        define $SCRIPTARGVAR ${SCRIPTARGDEF[*]}
+      fi
     fi
   fi
 
