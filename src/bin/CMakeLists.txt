@@ -1,1 +1,1 @@
-remake_add_scripts(ubash)
+remake_add_scripts(ubash PREFIX OFF)
