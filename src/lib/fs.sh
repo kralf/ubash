@@ -70,12 +70,13 @@ function fs_getfiles
   unset FILES
   FINDOPTS="-mindepth 1 -maxdepth 1 -xtype f"
 
-  for PATTERN in $(eval echo $1); do
-    DIRNAME=`dirname $PATTERN`
-    BASENAME=`basename $PATTERN`
+  for PATTERN in "$(eval echo $1)"; do
+    DIRNAME=`dirname "$PATTERN"`
+    BASENAME=`basename "$PATTERN"`
 
-    FILES[${#FILES[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\" 2> $NULL`"
-  done 
+    FILES[${#FILES[*]}]="`find \"$DIRNAME\" $FINDOPTS -name \"$BASENAME\" \
+      2> $NULL`"
+  done
 
   define $2 ${FILES[*]}
 }
@@ -92,12 +93,13 @@ function fs_getdirs
   unset DIRS
   FINDOPTS="-mindepth 1 -maxdepth 1 -xtype d"
 
-  for PATTERN in $(eval echo $1); do
-    DIRNAME=`dirname $PATTERN`
-    BASENAME=`basename $PATTERN`
+  for PATTERN in "$(eval echo $1)"; do
+    DIRNAME=`dirname "$PATTERN"`
+    BASENAME=`basename "$PATTERN"`
 
-    DIRS[${#DIRS[*]}]="`find $DIRNAME $FINDOPTS -name \"$BASENAME\" 2> $NULL`"
-  done 
+    DIRS[${#DIRS[*]}]="`find \"$DIRNAME\" $FINDOPTS -name \"$BASENAME\" \
+      2> $NULL`"
+  done
 
   define $2 ${DIRS[*]}
 }
