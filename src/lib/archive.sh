@@ -49,16 +49,16 @@ function archive_getcontents
 
 function archive_create
 {
-  ARCHIVE=$1
+  ARCHIVE="$1"
   shift
   ARCHIVEOPTS=$1
   shift
-  message_start "creating archive `basename $ARCHIVE`"
+  message_start "creating archive `basename \"$ARCHIVE\"`"
 
-  archive_getfilter $ARCHIVE FILTER
-  [ -d "`dirname $ARCHIVE`" ] || execute "mkdir -p \"`dirname $ARCHIVE`\""
-  execute "tar $ARCHIVEOPTS -c${FILTER}f $ARCHIVE $*"
+  archive_getfilter "$ARCHIVE" FILTER
+  [ -d "`dirname \"$ARCHIVE\"`" ] || execute "mkdir -p \"`dirname $ARCHIVE`\""
+  execute "tar $ARCHIVEOPTS -c${FILTER}f \"$ARCHIVE\" \"$*\""
 
-  fs_getfilesize $ARCHIVE ARCHIVESIZE
+  fs_getfilesize "$ARCHIVE" ARCHIVESIZE
   message_end "success, size of the archive is ${ARCHIVESIZE}kB"
 }

@@ -70,20 +70,23 @@ function fs_getfiles
   unset FILES
   FINDOPTS="-mindepth 1 -maxdepth 1 -xtype f"
 
-  for PATTERN in "$(eval echo $1)"; do
+  for PATTERN in "$1"; do
     DIRNAME=`dirname "$PATTERN"`
     BASENAME=`basename "$PATTERN"`
 
-    FILES[${#FILES[*]}]="`find \"$DIRNAME\" $FINDOPTS -name \"$BASENAME\" \
-      2> $NULL`"
+    FOUND=`find "$DIRNAME" $FINDOPTS -name "$BASENAME" 2> $NULL`
+
+    while read FILE; do
+      FILES[${#FILES[*]}]="$FILE"
+    done <<< "$FOUND"
   done
 
-  define $2 ${FILES[*]}
+  array_copy $2 FILES
 }
 
 function fs_getfilesize
 {
-  FILESIZE=(`du -hks $1 2> $NULL`)
+  FILESIZE=(`du -hks "$1" 2> $NULL`)
   [ -z "$FILESIZE" ] && FILESIZE="0"
   define $2 ${FILESIZE[0]}
 }
@@ -93,20 +96,23 @@ function fs_getdirs
   unset DIRS
   FINDOPTS="-mindepth 1 -maxdepth 1 -xtype d"
 
-  for PATTERN in "$(eval echo $1)"; do
+  for PATTERN in "$1"; do
     DIRNAME=`dirname "$PATTERN"`
     BASENAME=`basename "$PATTERN"`
 
-    DIRS[${#DIRS[*]}]="`find \"$DIRNAME\" $FINDOPTS -name \"$BASENAME\" \
-      2> $NULL`"
+    FOUND=`find "$DIRNAME" $FINDOPTS -name "$BASENAME" 2> $NULL`
+
+    while read DIR; do
+      DIRS[${#DIRS[*]}]="$DIR"
+    done <<< "$FOUND"
   done
 
-  define $2 ${DIRS[*]}
+  array_copy $2 DIRS
 }
 
 function fs_getdirsize
 {
-  DIRSIZE=(`du -hks $1 2> $NULL`)
+  DIRSIZE=(`du -hks "$1" 2> $NULL`)
   [ -z "$DIRSIZE" ] && DIRSIZE="0"
   define $2 ${DIRSIZE[0]}
 }
@@ -116,33 +122,33 @@ function fs_abspath
   unset ABSPATH
 
   if [ -d "$1" ]; then
-    pushd $1 > $NULL
+    pushd "$1" > $NULL
     ABSPATH="`pwd`"
     popd > $NULL
-  elif [ -d "`dirname $1`" ]; then
-    pushd `dirname $1` > $NULL
-    ABSPATH="`pwd`/`basename $1`"
+  elif [ -d "`dirname \"$1\"`" ]; then
+    pushd "`dirname \"$1\"`" > $NULL
+    ABSPATH="`pwd`/`basename \"$1\"`"
     popd > $NULL
   fi
 
   [ -z "$ABSPATH" ] && message_warn "path to $1 is invalid"
 
-  define $2 $ABSPATH
+  define $2 \"$ABSPATH\"
 }
 
 function fs_mkdirs
 {
-  ROOT=$1
+  ROOT="$1"
   shift
   message_start "making directory structure in $ROOT"
 
   while [ -n "$1" ]; do
-    MKDIR=`echo $1 | sed s/'^\/'//`
+    MKDIR="`echo \"$1\" | sed s/'^\/'//`"
 
     if ! [ -d "$ROOT/$MKDIR" ]; then
       message_start "making directory /$MKDIR"
 
-      execute "mkdir -p $ROOT/$MKDIR"
+      execute "mkdir -p \"$ROOT/$MKDIR\""
 
       message_end
     fi
@@ -155,17 +161,17 @@ function fs_mkdirs
 
 function fs_mkfiles
 {
-  ROOT=$1
+  ROOT="$1"
   shift
   message_start "making files in $ROOT"
 
   while [ -n "$1" ]; do
-    MKFILE=`echo $1 | sed s/'^\/'//`
+    MKFILE="`echo \"$1\" | sed s/'^\/'//`"
 
     if ! [ -e "$ROOT/$MKFILE" ]; then
       message_start "making file /$MKFILE"
 
-      execute "touch $ROOT/$MKFILE"
+      execute "touch \"$ROOT/$MKFILE\""
 
       message_end
     fi
@@ -178,17 +184,17 @@ function fs_mkfiles
 
 function fs_rmdirs
 {
-  ROOT=$1
+  ROOT="$1"
   shift
   message_start "removing directories in $ROOT"
 
   while [ -n "$1" ]; do
-    RMDIR=`echo $1 | sed s/'^\/'//`
+    RMDIR="`echo \"$1\" | sed s/'^\/'//`"
 
     if [ -d "$ROOT/$RMDIR" ]; then
       message_start "removing directory /$RMDIR"
 
-      execute "rm -rf $ROOT/$RMDIR"
+      execute "rm -rf \"$ROOT/$RMDIR\""
 
       message_end
     fi
@@ -201,14 +207,14 @@ function fs_rmdirs
 
 function fs_rmfiles
 {
-  ROOT=$1
+  ROOT="$1"
   shift
   message_start "removing files in $ROOT"
 
   while [ -n "$1" ]; do
     message_start "removing file(s) $1"
 
-    execute "find $ROOT -name $1 -xtype f -exec rm -rf {} \;"
+    execute "find \"$ROOT\" -name \"$1\" -xtype f -exec rm -rf {} \;"
 
     message_end
     shift
@@ -221,26 +227,27 @@ function fs_rmbrokenlinks
 {
   message_start "removing broken links from $1"
 
-  LINKS=`find $1 -type l`
-  for LINK in $LINKS; do
-    ! [ -e $LINK ] && execute "rm -rf $LINK"
-  done
+  FOUND=`find "$1" -type l 2> $NULL`
+
+  while read LINK; do
+    ! [ -e "$LINK" ] && execute "rm -rf \"$LINK\""
+  done <<< "$FOUND"
 
   message_end
 }
 
 function fs_chowndirs
 {
-  ROOT=$1
+  ROOT="$1"
   shift
   message_start "changing directory ownerships in $ROOT"
 
   while [ -n "$1" ]; do
     keyval "$1" CHOWNDIR CHOWNOWNER
-    CHOWNDIR=`echo $CHOWNDIR | sed s/'^\/'//`
+    CHOWNDIR="`echo \"$CHOWNDIR\" | sed s/'^\/'//`"
     message_start "changing ownership of /$CHOWNDIR to $CHOWNOWNER"
 
-    execute "chown -R $CHOWNOWNER $ROOT/$CHOWNDIR"
+    execute "chown -R $CHOWNOWNER \"$ROOT/$CHOWNDIR\""
 
     message_end
     shift
@@ -251,16 +258,16 @@ function fs_chowndirs
 
 function fs_chmoddirs
 {
-  ROOT=$1
+  ROOT="$1"
   shift
   message_start "changing directory permissions in $ROOT"
 
   while [ -n "$1" ]; do
     keyval "$1" CHMODDIR CHMODPERM
-    CHMODDIR=`echo $CHMODDIR | sed s/'^\/'//`
+    CHMODDIR="`echo \"$CHMODDIR\" | sed s/'^\/'//`"
     message_start "changing permissions of /$CHMODDIR to $CHMODPERM"
 
-    execute "find $ROOT/$CHMODDIR -xtype d -exec chmod $CHMODPERM {} \;"
+    execute "find \"$ROOT/$CHMODDIR\" -xtype d -exec chmod $CHMODPERM {} \;"
 
     message_end
     shift
@@ -273,18 +280,18 @@ function fs_cpdirs
 {
   CPOPTS="-dR --preserve=mode,timestamps --remove-destination"
 
-  ROOT=$1
+  ROOT="$1"
   shift
   message_start "copying directories to $ROOT"
 
   while [ -n "$1" ]; do
     keyval "$1" CPDIR CPDIROPTS
-    CPDIRS="`find $CPDIR -maxdepth 0 2> $NULL`"
+    CPDIRS="`find \"$CPDIR\" -maxdepth 0 2> $NULL`"
 
     for CPDIR in $CPDIRS; do
       message_start "copying directory $CPDIR"
 
-      execute "cp $CPOPTS $CPDIROPTS $CPDIR $ROOT"
+      execute "cp $CPOPTS $CPDIROPTS \"$CPDIR\" \"$ROOT\""
 
       message_end
     done
@@ -299,7 +306,7 @@ function fs_cpfiles
 {
   CPOPTS="-dR --preserve=mode,timestamps --remove-destination"
 
-  ROOT=$1
+  ROOT="$1"
   shift
   message_start "copying files to $ROOT"
 
@@ -307,7 +314,7 @@ function fs_cpfiles
     keyval "$1" CPFILE CPFILEOPTS
     message_start "copying file(s) $CPFILE"
 
-    execute "cp $CPOPTS $CPFILEOPTS $CPFILE $ROOT"
+    execute "cp $CPOPTS $CPFILEOPTS \"$CPFILE\" \"$ROOT\""
 
     message_end
     shift
@@ -318,15 +325,15 @@ function fs_cpfiles
 
 function fs_wrfiles
 {
-  ROOT=$1
+  ROOT="$1"
   shift
   message_start "writing files in $ROOT"
 
   while [ -n "$1" ]; do
-    WRFILE=`echo $1 | sed s/'^\/'//`
+    WRFILE="`echo \"$1\" | sed s/'^\/'//`"
     message_start "writing file /$1"
 
-    execute "echo -e $2 >> $ROOT/$1"
+    execute "echo -e $2 >> \"$ROOT/$1\""
 
     message_end
     shift
@@ -338,35 +345,35 @@ function fs_wrfiles
 
 function fs_mountimg
 {
-  MNTIMG=$1
-  MNTPOINT=$2
+  MNTIMG="$1"
+  MNTPOINT="$2"
 
   message_start "mounting filesystem image to $MNTPOINT"
 
-  execute "mkdir -p $MNTPOINT"
-  execute "mount -o loop $MNTIMG $MNTPOINT"
+  execute "mkdir -p \"$MNTPOINT\""
+  execute "mount -o loop \"$MNTIMG\" \"$MNTPOINT\""
 
   message_end
 }
 
 function fs_umountimg
 {
-  UMNTIMG=$1
-  UMNTPOINT=$2
+  UMNTIMG="$1"
+  UMNTPOINT="$2"
 
   message_start "unmounting filesystem image from $UMNTPOINT"
 
-  execute "umount $UMNTIMG"
-  execute "rm -rf $UMNTPOINT"
+  execute "umount \"$UMNTIMG\""
+  execute "rm -rf \"$UMNTPOINT\""
 
   message_end
 }
 
 function fs_mkimg
 {
-  FSIMAGE=$1
-  FSROOT=$2
-  FSMOUNTPOINT=$3
+  FSIMAGE="$1"
+  FSROOT="$2"
+  FSMOUNTPOINT="$3"
   FSTYPE=$4
   FSBLOCKSIZE=$5
   FSSPACE=$6
@@ -374,43 +381,43 @@ function fs_mkimg
   message_start "making filesystem image $FSIMAGE"
 
   message_start "evaluating image size"
-  fs_getdirsize $FSROOT FSSIZE
+  fs_getdirsize "$FSROOT" FSSIZE
   math_calc "$FSSIZE*1.05+$FSSPACE" FSSIZE
   message_end
 
   message_start "writing zeroed image"
-  execute "dd if=/dev/zero of=$FSIMAGE bs=1k count=$FSSIZE"
+  execute "dd if=/dev/zero of=\"$FSIMAGE\" bs=1k count=$FSSIZE"
   message_end
 
   message_start "building $FSTYPE filesystem on image device"
-  execute "/sbin/mkfs -t $FSTYPE -F $FSIMAGE -b $FSBLOCKSIZE"
+  execute "/sbin/mkfs -t $FSTYPE -F \"$FSIMAGE\" -b $FSBLOCKSIZE"
   message_end
 
-  fs_mountimg $FSIMAGE $FSMOUNTPOINT
+  fs_mountimg "$FSIMAGE" "$FSMOUNTPOINT"
 
   message_start "copying filesystem content to image"
-  execute "cp -a $FSROOT/* $FSMOUNTPOINT"
+  execute "cp -a \"$FSROOT/*\" \"$FSMOUNTPOINT\""
   message_end
 
-  fs_umountimg $FSIMAGE $FSMOUNTPOINT
+  fs_umountimg "$FSIMAGE" "$FSMOUNTPOINT"
 
   message_end "success, size of the filesystem image is ${FSSIZE}kB"
 }
 
 function fs_bind
 {
-  FSOLDDIR=$1
-  FSNEWDIR=$2
+  FSOLDDIR="$1"
+  FSNEWDIR="$2"
 
-  FSBOUND=`mount | grep "$2"`
+  FSBOUND="`mount | grep \"$FSNEWDIR\"`"
   if [ -z "$FSBOUND" ]; then
-    message_start "binding filesystem in $1 to $2"
+    message_start "binding filesystem in $FSOLDDIR to $FSNEWDIR"
 
-    [ -d "$2" ] || execute "mkdir -p $2"
-    execute "mount -t none -o bind $1 $2"
+    [ -d "$FSNEWDIR" ] || execute "mkdir -p \"$FSNEWDIR\""
+    execute "mount -t none -o bind \"$FSOLDDIR\" \"$FSNEWDIR\""
 
     message_end
   else
-    message "filesystem already bound to $2"
+    message "filesystem already bound to $FSNEWDIR"
   fi
 }
