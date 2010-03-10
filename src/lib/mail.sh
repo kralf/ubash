@@ -19,74 +19,18 @@
 #    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 ############################################################################
 
-# Global functions
+# Mailing functions
 
-function define {
-  VAR=$1
+function mail_send
+{
+  ADDRESS="$1"
   shift
-  unset $VAR
+  SUBJECT="$1"
+  shift
 
-  if [ $# -gt 1 ]; then
-    while [ -n "$1" ]; do
-      eval "$VAR[\${#$VAR[*]}]=\"$1\""
-      shift
-    done
-  else
-    eval "$VAR=\"$1\""
-  fi
+  message_start "sending mail to $ADDRESS"
+
+  execute "echo \"$*\" | mail -s \"[$SCRIPT] $SUBJECT\" $ADDRESS"
+
+  message_end "success, mail sent"
 }
-
-function defined {
-  [ "${!1-X}" == "${!1-Y}" ]
-}
-
-function true {
-  [ "${!1}" == "true" ] || [ "${!1}" == "yes" ]
-}
-
-function false {
-  [ "${!1}" != "true" ] && [ "${!1}" != "yes" ]
-}
-
-function keyval
-{
-  eval $2=`echo $1 | grep -o "^[^=]*"`
-  eval $3=`echo $1 | grep -o "=.*$" | sed s/"^="//`
-}
-
-function include
-{
-  INCSOURCE=${BASH_SOURCE[1]}
-  [ "$0" == "$INCSOURCE" ] && INCDIR=`pwd` || INCDIR=`dirname $INCSOURCE`
-
-  while [ -n "$1" ]; do
-    [[ "$1" =~ ^/ ]] && INCLUDE="$1" || INCLUDE="$INCDIR/$1"
-
-    if [ -r "$INCLUDE" ]; then
-      . "$INCLUDE"
-      INCLUDES=("$INCLUDE" ${INCLUDES[*]})
-    else
-      message_exit "missing include $1"
-    fi
-
-    shift
-  done
-}
-
-include "system.sh"
-include "archive.sh"
-include "array.sh"
-include "build.sh"
-include "execute.sh"
-include "fs.sh"
-include "install.sh"
-include "log.sh"
-include "mail.sh"
-include "math.sh"
-include "message.sh"
-include "network.sh"
-include "regexp.sh"
-include "script.sh"
-include "string.sh"
-include "test.sh"
-include "xen.sh"
