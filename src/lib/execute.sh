@@ -30,13 +30,14 @@ function execute
     true VERBOSE && message "executing \"$1\""
 
     log_command "$1"
-    LINES=`eval "$1" 2>> $LOGFILE | tee -a $LOGFILE`
+    LINES=`eval "$1" 2>> $LOGFILE && DUMMY=0 | tee -a $LOGFILE`
+    RESULT="$?"
 
     while read LINE; do
       STDOUT[${#STDOUT[*]}]="$LINE"
     done <<< "$LINES"
 
-    [ "$?" != 0 ] && message_exit "failed to execute command \"$1\""
+    [ "$RESULT" != 0 ] && message_exit "failed to execute command \"$1\""
     shift
   done
 
@@ -90,13 +91,14 @@ function execute_root
     true VERBOSE && message "executing \"$1\""
 
     log_command "$1"
-    LINES=`chroot $ROOT sh -l -c "$1" 2>> $LOGFILE | tee -a $LOGFILE`
+    LINES=`chroot $ROOT sh -l -c "$1" 2>> $LOGFILE && DUMMY=0 | tee -a $LOGFILE`
+    RESULT="$?"
 
     while read LINE; do
       STDOUT[${#STDOUT[*]}]="$LINE"
     done <<< "$LINES"
 
-    [ "$?" != 0 ] && message_exit "failed to execute command \"$1\""
+    [ "$RESULT" != 0 ] && message_exit "failed to execute command \"$1\""
     shift
   done
 

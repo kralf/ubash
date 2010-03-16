@@ -204,7 +204,7 @@ function script_checkopts
         HELP="true"
       fi
     else
-      SCRIPTARGS[${#SCRIPTARGS[*]}]=$1
+      SCRIPTARGS[${#SCRIPTARGS[*]}]="$1"
     fi
 
     shift
@@ -226,10 +226,10 @@ function script_checkopts
     done
   else
     if [ ${#SCRIPTARGS[*]} -gt 0 ]; then
-      define $SCRIPTARGVAR ${SCRIPTARGS[*]}
+      array_copy $SCRIPTARGVAR SCRIPTARGS
     else
       if [ ${#SCRIPTARGDEF[*]} -gt 0 ]; then
-        define $SCRIPTARGVAR ${SCRIPTARGDEF[*]}
+        array_copy $SCRIPTARGVAR SCRIPTARGDEF
       fi
     fi
   fi
