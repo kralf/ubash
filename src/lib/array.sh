@@ -21,9 +21,6 @@
 
 # Array functions
 
-# Change break character for arrays
-IFS=$'\n'
-
 function array_defined
 {
   [ -n "`declare -p $1 2> $NULL | grep \"declare -a\"`" ]
