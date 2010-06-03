@@ -20,5 +20,12 @@ remake_doc(
   html
 )
 
-remake_pack_deb(ARCH all bash)
-remake_pack_deb(ARCH all COMPONENT doc)
+remake_pack_deb(
+  ARCH all
+  bash
+)
+remake_pack_deb(
+  ARCH all
+  COMPONENT doc
+  DESCRIPTION "documentation"
+)
