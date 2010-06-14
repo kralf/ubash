@@ -166,15 +166,15 @@ function build_packages
         message_end
 
         fs_getfiles "$PATCHDIR/$PKGNAME-$PKGVERSION*.$SUFFIX.patch" PATCHES
-        if [ -n "$PATCHES" ]; then
-          message_start "patching package sources"
-          build_patchdir $PKGEXTRACTROOT ${PATCHES[*]}
-          message_end
-        fi
-
         if ! [ -d "$PKGBUILDROOT" ]; then
           fs_getdirs "$BUILDROOT/$PKGFULLNAME" PKGEXTRACTROOT
           execute "mv $PKGEXTRACTROOT $PKGBUILDROOT"
+        fi
+        
+        if [ -n "$PATCHES" ]; then
+          message_start "patching package sources"
+          build_patchdir $PKGBUILDROOT ${PATCHES[*]}
+          message_end
         fi
       else
         message_start "linking $PKG to $PKGBUILDROOT"
