@@ -168,7 +168,7 @@ function build_packages
         fs_getfiles "$PATCHDIR/$PKGNAME-$PKGVERSION*.$SUFFIX.patch" PATCHES
         if [ -n "$PATCHES" ]; then
           message_start "patching package sources"
-          build_patchdir $BUILDROOT ${PATCHES[*]}
+          build_patchdir $PKGEXTRACTROOT ${PATCHES[*]}
           message_end
         fi
 
