@@ -85,7 +85,7 @@ function build_patchdir
   while [ -n "$1" ]; do
     message_start "applying $1"
 
-    execute "patch -d $ROOT -p0 < $1"
+    execute "patch -d $ROOT -p1 < $1"
 
     message_end
     shift
