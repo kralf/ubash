@@ -70,16 +70,31 @@ function fs_getfiles
   unset FILES
   FINDOPTS="-mindepth 1 -maxdepth 1 -xtype f"
 
-  for PATTERN in "$1"; do
-    DIRNAME=`dirname "$PATTERN"`
-    BASENAME=`basename "$PATTERN"`
+  DIRNAME=`dirname "$1"`
+  BASENAME=`basename "$1"`
 
-    FOUND=`find "$DIRNAME" $FINDOPTS -name "$BASENAME" 2> $NULL`
+  FOUND=`find "$DIRNAME" $FINDOPTS -name "$BASENAME" 2> $NULL`
 
-    while read FILE; do
-      FILES[${#FILES[*]}]="$FILE"
-    done <<< "$FOUND"
-  done
+  while read FILE; do
+    FILES[${#FILES[*]}]="$FILE"
+  done <<< "$FOUND"
+
+  array_copy $2 FILES
+}
+
+function fs_regexfiles
+{
+  unset FILES
+  FINDOPTS="-mindepth 1 -maxdepth 1 -xtype f"
+
+  DIRNAME=`dirname "$1"`
+  BASENAME=`basename "$1"`
+
+  FOUND=`find "$DIRNAME" $FINDOPTS -regex ".*/$BASENAME" 2> $NULL`
+
+  while read FILE; do
+    FILES[${#FILES[*]}]="$FILE"
+  done <<< "$FOUND"
 
   array_copy $2 FILES
 }
@@ -96,25 +111,54 @@ function fs_getdirs
   unset DIRS
   FINDOPTS="-mindepth 1 -maxdepth 1 -xtype d"
 
-  for PATTERN in "$1"; do
-    DIRNAME=`dirname "$PATTERN"`
-    BASENAME=`basename "$PATTERN"`
+  DIRNAME=`dirname "$1"`
+  BASENAME=`basename "$1"`
 
-    FOUND=`find "$DIRNAME" $FINDOPTS -name "$BASENAME" 2> $NULL`
+  FOUND=`find "$DIRNAME" $FINDOPTS -name "$BASENAME" 2> $NULL`
 
-    while read DIR; do
-      DIRS[${#DIRS[*]}]="$DIR"
-    done <<< "$FOUND"
-  done
+  while read DIR; do
+    DIRS[${#DIRS[*]}]="$DIR"
+  done <<< "$FOUND"
+
+  array_copy $2 DIRS
+}
+
+function fs_regexdirs
+{
+  unset DIRS
+  FINDOPTS="-mindepth 1 -maxdepth 1 -xtype d"
+
+  DIRNAME=`dirname "$1"`
+  BASENAME=`basename "$1"`
+
+  FOUND=`find "$DIRNAME" $FINDOPTS -regex ".*/$BASENAME" 2> $NULL`
+
+  while read DIR; do
+    DIRS[${#DIRS[*]}]="$DIR"
+  done <<< "$FOUND"
 
   array_copy $2 DIRS
 }
 
 function fs_getdirsize
 {
-  DIRSIZE=(`du -hks "$1" 2> $NULL`)
+  ROOT=$1
+  shift
+  VAR=$1
+  shift
+
+  unset DUOPTS
+  for EXCLUDE in $*; do
+    if [[ "$EXCLUDE" =~ ^/ ]]; then
+      DUOPTS="$DUOPTS --exclude=\"$ROOT$EXCLUDE\""
+    else
+      DUOPTS="$DUOPTS --exclude=\"$EXCLUDE\""
+    fi
+  done
+
+  DIRSIZE=(`du -hks $DUOPTS $ROOT 2> $NULL`)
   [ -z "$DIRSIZE" ] && DIRSIZE="0"
-  define $2 ${DIRSIZE[0]}
+  define $VAR ${DIRSIZE[0]}
 }
 
 function fs_abspath
@@ -302,6 +346,34 @@ function fs_cpdirs
   message_end "success, directories copied"
 }
 
+function fs_cpdevices
+{
+  CPOPTS="-dR --preserve=mode,timestamps --remove-destination"
+
+  ROOT="$1"
+  shift
+  message_start "copying devices to $ROOT/dev"
+
+  ! [ -d "$ROOT/dev" ] && fs_mkdirs \"$ROOT\" /dev
+
+  while [ -n "$1" ]; do
+    for CPDEV in /dev/$1; do
+      if [ -e "$CPDEV" ]; then
+        message_start "copying device $CPDEV"
+
+        execute "cp $CPOPTS \"$CPDEV\" \"$ROOT$CPDEV\""
+
+        message_end
+      else
+        message_warn "no such device(s) $CPDEV"
+      fi
+    done
+    shift
+  done
+
+  message_end "success, devices copied"
+}
+
 function fs_cpfiles
 {
   CPOPTS="-dR --preserve=mode,timestamps --remove-destination"
@@ -363,7 +435,7 @@ function fs_umountimg
 
   message_start "unmounting filesystem image from $UMNTPOINT"
 
-  execute "umount \"$UMNTIMG\""
+  execute "umount \"$UMNTPOINT\""
   execute "rm -rf \"$UMNTPOINT\""
 
   message_end
@@ -372,16 +444,23 @@ function fs_umountimg
 function fs_mkimg
 {
   FSIMAGE="$1"
-  FSROOT="$2"
-  FSMOUNTPOINT="$3"
-  FSTYPE=$4
-  FSBLOCKSIZE=$5
-  FSSPACE=$6
+  shift
+  FSROOT="$1"
+  shift
+  FSMOUNTPOINT="$1"
+  shift
+  FSTYPE=$1
+  shift
+  FSBLOCKSIZE=$1
+  shift
+  FSSPACE=$1
+  shift
+  FSEXCLUDES=$*
 
   message_start "making filesystem image $FSIMAGE"
 
   message_start "evaluating image size"
-  fs_getdirsize "$FSROOT" FSSIZE
+  fs_getdirsize "$FSROOT" FSSIZE $FSEXCLUDES
   math_calc "$FSSIZE*1.05+$FSSPACE" FSSIZE
   message_end
 
@@ -395,8 +474,13 @@ function fs_mkimg
 
   fs_mountimg "$FSIMAGE" "$FSMOUNTPOINT"
 
+  unset FSRSYNCOPTS
+  for FSEXCLUDE in $FSEXCLUDES; do
+    FSRSYNCOPTS="$FSRSYNCOPTS --exclude=\"$FSEXCLUDE\""
+  done
+
   message_start "copying filesystem content to image"
-  execute "cp -a \"$FSROOT/*\" \"$FSMOUNTPOINT\""
+  execute "rsync -av $FSRSYNCOPTS \"$FSROOT/\" \"$FSMOUNTPOINT\""
   message_end
 
   fs_umountimg "$FSIMAGE" "$FSMOUNTPOINT"

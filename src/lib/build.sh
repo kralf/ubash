@@ -48,20 +48,22 @@ function build_setenv
 
   message_start "setting up the $TARGET build environment"
 
-  CPP="$TARGET-linux-cpp"
-  CC="$TARGET-linux-gcc"
-  CXX="$TARGET-linux-g++"
-  AR="$TARGET-linux-ar"
-  AS="$TARGET-linux-as"
-  RANLIB="$TARGET-linux-ranlib"
-  LD="$TARGET-linux-ld"
-  STRIP="$TARGET-linux-strip"
+  CPP="$ROOT/bin/$TARGET-linux-cpp"
+  CC="$ROOT/bin/$TARGET-linux-gcc"
+  CXX="$ROOT/bin/$TARGET-linux-g++"
+  AR="$ROOT/bin/$TARGET-linux-ar"
+  AS="$ROOT/bin/$TARGET-linux-as"
+  RANLIB="$ROOT/bin/$TARGET-linux-ranlib"
+  LD="$ROOT/bin/$TARGET-linux-ld"
+  STRIP="$ROOT/bin/$TARGET-linux-strip"
   export CC CXX AR AS RANLIB LD STRIP
 
   CFLAGS="-I$ROOT/include -I$ROOT/usr/include"
   LDFLAGS="-L$ROOT/lib -L$ROOT/usr/lib"
   true DEBUG && LDFLAGS="$LDFLAGS -s"
-  export CFLAGS LDFLAGS
+  CMAKEFLAGS="-DCMAKE_SYSTEM_NAME=Linux"
+  CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX"
+  export CFLAGS LDFLAGS CMAKEFLAGS
 
   message_end
 }
@@ -108,7 +110,8 @@ function build_packages
 
   BUILDROOT=$1
   shift
-  fs_abspath $1 EPREFIX
+  fs_abspath $1 INSTALLROOT
+  EPREFIX="$INSTALLROOT"
   PREFIX="$EPREFIX/usr"
   shift
 
@@ -125,7 +128,6 @@ function build_packages
 
   while [ -n "$1" ]; do
     keyval "$1" ALIAS VERSION
-    [ -z "$VERSION" ] && VERSION="[0-9]*"
     message_boldstart "building package $ALIAS"
 
     ADDONS=""
@@ -135,10 +137,17 @@ function build_packages
 
     [ -r "$PKGCONFFILE" ] && include "$PKGCONFFILE"
     if [ -z "$PKG" ] || [ ! -r "$PKG" ]; then
-      fs_getdirs "$PKGDIR/$ALIAS-$VERSION" PKG
-    fi
-    if [ -z "$PKG" ] || [ ! -r "$PKG" ]; then
-      fs_getfiles "$PKGDIR/$ALIAS-$VERSION.{tar,tar.gz,tar.bz2}" PKG
+      if [ -z "$VERSION" ]; then
+        fs_getdirs "$PKGDIR/$ALIAS" PKGUDIR
+        fs_regexdirs "$PKGDIR/$ALIAS-[0-9].*" PKGVDIR
+        fs_regexfiles "$PKGDIR/$ALIAS\(\.tar\)?\(\.[gb]z[2]?\)" PKGUARCH
+        fs_regexfiles "$PKGDIR/$ALIAS-[0-9].*\(\.tar\)?\(\.[gb]z[2]?\)" PKGVARCH
+        PKG=($PKGUDIR $PKGVDIR $PKGUARCH $PKGVARCH)
+      else
+        fs_getdirs "$PKGDIR/$ALIAS-$VERSION" PKGDIR
+        fs_regexfiles "$PKGDIR/$ALIAS-$VERSION\(\.tar\)?\(\.[gb]z[2]?\)" PKGARCH
+        PKG=($PKGDIR $PKGARCH)
+      fi
     fi
     [ ${#PKG[*]} -gt 1 ] && message_exit "package $ALIAS has ambigius versions"
     [ -r "$PKG" ] || message_exit "package $ALIAS not found"
@@ -147,6 +156,18 @@ function build_packages
     PKGFULLNAME=${PKGBASENAME%.tar*}
     PKGNAME=${PKGFULLNAME%%-[0-9]*}
     PKGVERSION=${PKGFULLNAME#$PKGNAME-}
+
+    GLOBALCMAKEFLAGS="$CMAKEFLAGS"
+    GLOBALCFLAGS="$CFLAGS"
+    GLOBALLDFLAGS="$LDFLAGS"
+
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_FIND_ROOT_PATH=$INSTALLROOT"
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER"
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY"
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY"
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_INSTALL_PREFIX=$PREFIX"
+    CFLAGS="$CFLAGS -I$EPREFIX/include -I$PREFIX/include"
+    LDFLAGS="$LDFLAGS -L$EPREFIX/lib -L$PREFIX/lib"
 
     BUILDDIR="."
     ARCH="$TARGET"
@@ -187,27 +208,37 @@ function build_packages
     fi
 
     message_start "descending into build directory"
-    [ -d "$PKGBUILDROOT/$BUILDDIR" ] || \
-      execute "mkdir -p $PKGBUILDROOT/$BUILDDIR"
+    PKGBUILDDIR="$PKGBUILDROOT/$BUILDDIR"
 
+    [ -d "$PKGBUILDDIR" ] || execute "mkdir -p $PKGBUILDDIR"
     if ! true INSTALL; then
       if [ "$CONFIGURE" != "" ]; then
         message "configuring package sources"
-        execute "cd $PKGBUILDROOT/$BUILDDIR && ${CONFIGURE[*]}"
+        for (( A=0; A < ${#CONFIGURE[*]}; A++ )); do
+          execute "cd $PKGBUILDDIR && ${CONFIGURE[$A]}"
+        done
       fi
 
       if [ "$MAKEBUILD" != "" ]; then
         message "compiling package sources ($COMMENT)"
-        execute "cd $PKGBUILDROOT/$BUILDDIR && ${MAKEBUILD[*]}"
+        for (( A=0; A < ${#MAKEBUILD[*]}; A++ )); do
+          execute "cd $PKGBUILDDIR && ${MAKEBUILD[$A]}"
+        done
       fi
     fi
 
     if [ "$MAKEINSTALL" != "" ]; then
       message "installing built package content"
-      execute "cd $PKGBUILDROOT/$BUILDDIR && ${MAKEINSTALL[*]}"
+      for (( A=0; A < ${#MAKEINSTALL[*]}; A++ )); do
+        execute "cd $PKGBUILDDIR && ${MAKEINSTALL[$A]}"
+      done
     fi
-  
+
     message_end "ascending from build directory"
+
+    CMAKEFLAGS="$GLOBALCMAKEFLAGS"
+    CFLAGS="$GLOBALCFLAGS"
+    LDFLAGS="$GLOBALLDFLAGS"
 
     message_boldend "success, package $ALIAS built"
     shift
