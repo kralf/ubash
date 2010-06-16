@@ -461,7 +461,7 @@ function fs_mkimg
 
   message_start "evaluating image size"
   fs_getdirsize "$FSROOT" FSSIZE $FSEXCLUDES
-  math_calc "$FSSIZE*1.05+$FSSPACE" FSSIZE
+  math_calc "$FSSIZE*1.10+$FSSPACE" FSSIZE
   message_end
 
   message_start "writing zeroed image"
