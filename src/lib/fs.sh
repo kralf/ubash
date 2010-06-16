@@ -150,14 +150,15 @@ function fs_getdirsize
   unset DUOPTS
   for EXCLUDE in $*; do
     if [[ "$EXCLUDE" =~ ^/ ]]; then
-      DUOPTS="$DUOPTS --exclude=\"$ROOT$EXCLUDE\""
+      DUOPTS="$DUOPTS --exclude=$ROOT$EXCLUDE"
     else
-      DUOPTS="$DUOPTS --exclude=\"$EXCLUDE\""
+      DUOPTS="$DUOPTS --exclude=$EXCLUDE"
     fi
   done
 
   DIRSIZE=(`du -hks $DUOPTS $ROOT 2> $NULL`)
   [ -z "$DIRSIZE" ] && DIRSIZE="0"
+
   define $VAR ${DIRSIZE[0]}
 }
 
