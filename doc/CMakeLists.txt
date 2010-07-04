@@ -5,7 +5,8 @@ remake_find_file(IO/Compress/Gzip.pm PACKAGE zlib-perl PATHS /usr/share/perl5)
 if(PERL_FOUND AND GROFF_FOUND AND ZLIB_PERL_FOUND)
   remake_file_configure(shdoc.conf.remake OUTPUT shdoc_config)
   remake_add_documentation(CUSTOM ShDoc
-    ${PERL_EXECUTABLE} shdoc.pl -c ${shdoc_config} -t
-    INPUT ${CMAKE_SOURCE_DIR}/${REMAKE_PROJECT_SOURCE_DIR}
+    ${PERL_EXECUTABLE} shdoc.pl -q -c ${shdoc_config} -t %TYPE% -o %OUTPUT%
+      %INPUT%
+    INPUT ${REMAKE_PROJECT_SOURCE_DIR}/lib/*.sh
     TYPES man ascii utf8 html ps)
 endif(PERL_FOUND AND GROFF_FOUND AND ZLIB_PERL_FOUND)
