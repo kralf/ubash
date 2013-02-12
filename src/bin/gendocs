@@ -408,9 +408,9 @@ sub find_source {
   return unless -f $source_name;
   return unless basename($source_name)  =~ /$source_pattern/;
 
-  print_stdout "$generator: Parsing ".basename($source_name)."\n";
+  print_stderr "$generator: Parsing ".basename($source_name)."\n";
   read_source($source_name, \%module, \@variables, \@functions, \%references);
-  print_stdout "$generator: - $module{name}: ".@functions." function(s), ".
+  print_stderr "$generator: - $module{name}: ".@functions." function(s), ".
     keys(%references)." reference(s)\n";
 
   my $man_name = lc($project_name)."_".lc($module{name});
@@ -423,7 +423,7 @@ sub find_source {
   }
   
   my $man;
-  print_stdout "$generator: - $module{name}: Generating ".
+  print_stderr "$generator: - $module{name}: Generating ".
     "$man_name($man_extension)\n";
   generate_man($man_name, \%module, \@variables, \@functions, \%references,
     \$man);

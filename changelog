@@ -1,3 +1,9 @@
+ubash (0.1-53) lucid; urgency=low
+
+  * Output of gendocs diverted to STDERR
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 12 Feb 2013 09:42:00 +0100
+
 ubash (0.1-52) lucid; urgency=low
 
   * Release distribution
