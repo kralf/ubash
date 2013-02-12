@@ -1,0 +1,319 @@
+ubash (0.1-52) lucid; urgency=low
+
+  * Release distribution
+  * Bash documentation generator gendocs now displaying command line help
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 12 Feb 2013 09:37:00 +0100
+
+ubash (0.1-51) unstable; urgency=low
+
+  * Fixed library file install destination
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 15 Aug 2010 20:42:04 +0200
+
+ubash (0.1-50) unstable; urgency=low
+
+  * Modified shdoc.pl to accept -q flag
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 04 Jul 2010 19:32:08 +0200
+
+ubash (0.1-49) unstable; urgency=low
+
+  * Fixed exclusion bug in fs_getdirsize()
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 16 Jun 2010 14:36:49 +0200
+
+ubash (0.1-48) unstable; urgency=low
+
+  * Raised fs_mkimage() filesystem size margin
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 16 Jun 2010 14:22:00 +0200
+
+ubash (0.1-47) unstable; urgency=low
+
+  * Fixed build functions to work with RoboX Linux scripts
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 16 Jun 2010 12:04:30 +0200
+
+ubash (0.1-46) unstable; urgency=low
+
+  * See previous revision
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 14 Jun 2010 14:46:00 +0200
+
+ubash (0.1-45) unstable; urgency=low
+
+  * Follow-up fix to build_patchdir
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 14 Jun 2010 14:21:10 +0200
+
+ubash (0.1-44) unstable; urgency=low
+
+  * Fixed build_patchdir to use -p1 with patch
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 14 Jun 2010 14:01:29 +0200
+
+ubash (0.1-43) unstable; urgency=low
+
+  * Enhanced packaging information
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Thu, 03 Jun 2010 16:40:45 +0200
+
+ubash (0.1-42) unstable; urgency=low
+
+  * Removed line break array separation
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 04 Apr 2010 00:28:28 +0200
+
+ubash (0.1-41) unstable; urgency=low
+
+  * Changed array break character to newline
+  * Fixed script_checkopts to work on arrays with whitespaces
+  * Fixed execute to exit on return
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 16 Mar 2010 17:59:13 +0100
+
+ubash (0.1-40) unstable; urgency=low
+
+  * Added untested mail.sh with function mail_send()
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 10 Mar 2010 20:23:48 +0100
+
+ubash (0.1-39) unstable; urgency=low
+
+  * Further fixes that involve spaces in filenames
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Fri, 05 Feb 2010 10:52:47 +0100
+
+ubash (0.1-38) unstable; urgency=low
+
+  * Fixed bug in fs_getdirs and fs_getfiles that would neglect filenames
+    with whitespaces
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Fri, 05 Feb 2010 08:35:27 +0100
+
+ubash (0.1-37) unstable; urgency=low
+
+  * Fixed bug in script_checkopts()
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 30 Nov 2009 11:57:04 +0100
+
+ubash (0.1-36) unstable; urgency=low
+
+  * Removed script prefix from ubash
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 30 Nov 2009 11:37:40 +0100
+
+ubash (0.1-35) unstable; urgency=low
+
+  * Fixed bug in install.sh
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 25 Nov 2009 11:03:34 +0100
+
+ubash (0.1-34) unstable; urgency=low
+
+  * Set executable permissions for ubash
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 01 Nov 2009 10:29:35 +0100
+
+ubash (0.1-33) unstable; urgency=low
+
+  * Added UCF_FORCE_CONFFNEW=yes to install_packages() environment
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 23 Sep 2009 18:50:07 +0200
+
+ubash (0.1-32) unstable; urgency=low
+
+  * Removed non-interactive apt-get input feature in install_packages()
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 21 Sep 2009 00:00:09 +0200
+
+ubash (0.1-31) unstable; urgency=low
+
+  * Fixed environment export issue in install_packages()
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 20 Sep 2009 23:03:19 +0200
+
+ubash (0.1-30) unstable; urgency=low
+
+  * Fixed run_scripts() and build_packages() to comply with recent changes
+    in execute()
+  * Fixed array notation
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 20 Sep 2009 20:01:06 +0200
+
+ubash (0.1-29) unstable; urgency=low
+
+  * Adapted to recent changes in ReMake
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 08 Sep 2009 08:48:53 +0200
+
+ubash (0.1-28) unstable; urgency=low
+
+  * ReMake project definition updated
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Fri, 04 Sep 2009 21:09:02 +0200
+
+ubash (0.1-27) unstable; urgency=low
+
+  * Fixed bug in ubash script_checkopts()
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Thu, 27 Aug 2009 10:44:22 +0200
+
+ubash (0.1-26) unstable; urgency=low
+
+  * uBash array_copy function
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sat, 22 Aug 2009 13:30:12 +0200
+
+ubash (0.1-25) unstable; urgency=low
+
+  * uBash packaging with ReMake
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 12 Aug 2009 16:34:17 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Initial revision of ReMake
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 29 Jul 2009 16:49:15 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Fix in ubash globals
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 27 Jul 2009 09:01:59 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Changes to ubash filesystem functions
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 27 Jul 2009 09:01:36 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Modified ubash script module to take multiple arguments
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 13 Jul 2009 11:07:09 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Modified ubash filesystem and script functions
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 13 Jul 2009 09:58:18 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * New ubash archive creation function
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Thu, 09 Jul 2009 10:33:49 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Major changes to ubash script module, now explicitly supporting array
+    of variable arguments
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 05 Jul 2009 21:27:53 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * First array function in ubash
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 05 Jul 2009 14:18:15 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * changed ubash file and dir copy mechanism to not use parent directories,
+    install functions provide this behavior
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 30 Jun 2009 17:04:10 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Filesystem bind method in ubash
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 24 Jun 2009 15:13:51 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Minor changes to regexp in ubash
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 23 Jun 2009 17:26:38 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Added regular expression module to ubash
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 23 Jun 2009 07:24:09 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * ubash ARCH variable reset in build.sh
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 14 Jun 2009 11:39:39 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Major bugfixes in ubash define method
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 27 May 2009 16:12:19 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Some bugfix
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 27 May 2009 14:51:32 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Added untested ubash xen boot functions
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 20 May 2009 11:21:20 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * ubash define assigns array variables
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 20 May 2009 10:45:41 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Archive functions in ubash
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 18 May 2009 08:45:15 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Finalized package build function in ubash
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 17 May 2009 19:27:07 +0200
+
+ubash (0.1) unstable; urgency=low
+
+  * Build extension to ubash
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sat, 07 Mar 2009 07:10:58 +0100
+
+ubash (0.1) unstable; urgency=low
+
+  * Minor fix in ubash script.sh
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 03 Mar 2009 16:07:18 +0100
+
+ubash (0.1) unstable; urgency=low
+
+  * ubash further bugfixing
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 03 Mar 2009 15:10:22 +0100
+
+ubash (0.1) unstable; urgency=low
+
+  * ubash bugfixes
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 02 Mar 2009 19:20:25 +0100
+
+ubash (0.1) unstable; urgency=low
+
+  * Useful BASH initial revision
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 02 Mar 2009 17:50:23 +0100
