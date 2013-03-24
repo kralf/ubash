@@ -22,7 +22,7 @@ remake_doc(
 
 remake_pack_deb(
   ARCH all
-  bash
+  DEPENDS bash
 )
 remake_pack_deb(
   ARCH all
