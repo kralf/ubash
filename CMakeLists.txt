@@ -9,7 +9,7 @@ remake_project(
   SUMMARY "A collection of useful bash scripts spanning a growing area of applications."
   AUTHOR "Ralf Kaestner"
   CONTACT "ralf.kaestner@gmail.com"
-  HOME "http://aslforge.ethz.ch/projects/ubash"
+  HOME "http://github.com/kralf/ubash"
   LICENSE "GNU Lesser General Public License (LGPL)"
   INSTALL /usr
 )

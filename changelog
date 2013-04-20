@@ -1,3 +1,9 @@
+ubash (0.1-58) lucid; urgency=low
+
+  * Adapted project information
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 20 Apr 2013 11:14:00 +0100
+
 ubash (0.1-57) lucid; urgency=low
 
   * Rebased project to github
