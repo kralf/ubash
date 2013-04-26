@@ -1,3 +1,10 @@
+ubash (0.1-60) lucid; urgency=low
+
+  * More quotes placed in script_checkopts() to properly pass default
+    arguments
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Fri, 26 Apr 2013 09:54:00 +0100
+
 ubash (0.1-59) lucid; urgency=low
 
   * Fixed bug in script_checkopts() which prevented the use of quotes in

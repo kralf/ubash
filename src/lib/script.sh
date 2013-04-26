@@ -63,26 +63,26 @@ SCRIPTOPTDOCS=("display usage and exit"
 
 function script_init
 {
-  SCRIPTDOC=$1
+  SCRIPTDOC="$1"
   shift
 
   while [ -n "$1" ]; do
-    SCRIPTDSPVAR[${#SCRIPTDSPVAR[*]}]=$1
+    SCRIPTDSPVAR[${#SCRIPTDSPVAR[*]}]="$1"
     shift
-    SCRIPTARGVAR[${#SCRIPTARGVAR[*]}]=$1
+    SCRIPTARGVAR[${#SCRIPTARGVAR[*]}]="$1"
     shift
-    SCRIPTARGDEF[${#SCRIPTARGDEF[*]}]=$1
+    SCRIPTARGDEF[${#SCRIPTARGDEF[*]}]="$1"
     shift
-    SCRIPTARGDOC[${#SCRIPTARGDOC[*]}]=$1
+    SCRIPTARGDOC[${#SCRIPTARGDOC[*]}]="$1"
     shift
   done
 }
 
 function script_init_array
 {
-  SCRIPTDOC=$1
-  SCRIPTDSPVAR=$2
-  SCRIPTARGVAR=$3
+  SCRIPTDOC="$1"
+  SCRIPTDSPVAR="$2"
+  SCRIPTARGVAR="$3"
   SCRIPTARGDEF=("${*:4:$#-4}")
   SCRIPTARGDOC="${*:$#}"
 }
@@ -157,11 +157,11 @@ function script_setopt
 {
   NUMOPTS=${#SCRIPTOPTTAGS[*]}
 
-  SCRIPTOPTTAGS[$NUMOPTS]=$1
-  SCRIPTOPTVALS[$NUMOPTS]=$2
-  SCRIPTOPTVARS[$NUMOPTS]=$3
-  SCRIPTOPTDEFS[$NUMOPTS]=$4
-  SCRIPTOPTDOCS[$NUMOPTS]=$5
+  SCRIPTOPTTAGS[$NUMOPTS]="$1"
+  SCRIPTOPTVALS[$NUMOPTS]="$2"
+  SCRIPTOPTVARS[$NUMOPTS]="$3"
+  SCRIPTOPTDEFS[$NUMOPTS]="$4"
+  SCRIPTOPTDOCS[$NUMOPTS]="$5"
 }
 
 function script_checkopts
@@ -170,7 +170,7 @@ function script_checkopts
 
   NUMOPTS=${#SCRIPTOPTTAGS[*]}
   for (( A=0; A < $NUMOPTS; A++ )); do
-    define ${SCRIPTOPTVARS[A]} ${SCRIPTOPTDEFS[A]}
+    define ${SCRIPTOPTVARS[A]} "${SCRIPTOPTDEFS[A]}"
   done
 
   RETVAL=0
@@ -255,7 +255,7 @@ function script_checkroot
 
 function script_run
 {
-  SCRIPTDIR=$1
+  SCRIPTDIR="$1"
   shift
 
   message_start "running scripts in $SCRIPTDIR"
