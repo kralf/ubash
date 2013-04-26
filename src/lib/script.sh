@@ -191,7 +191,7 @@ function script_checkopts
             define $OPTVAR "true"
             MATCH="true"
           else
-            define $OPTVAR $2
+            define $OPTVAR "$2"
             MATCH="true"
             shift
           fi
