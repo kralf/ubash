@@ -245,6 +245,7 @@ sub generate_man {
   $$man .= ".SH SYNOPSIS\n";
   $$man .= ".BR \"include \"\"$$module{source}\"\"\n";
   $$man .= ".sp\n";
+  $$man .= ".PD 0\n";
   for my $function (@$functions) {
     my $function_signature;
     my @param_signatures;
@@ -280,6 +281,7 @@ sub generate_man {
     $$man .= ".BR \"$function->{name}($function->{signature})\"\n";
     $$man .= ".br\n";
   }
+  $$man .= ".PD\n";
 
   $$man .= ".SH DESCRIPTION\n";
   if ($$module{description}) {
