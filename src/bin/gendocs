@@ -229,7 +229,7 @@ sub generate_man {
   my $date = sprintf("%d-%02d-%02d", $time[5]+1900, $time[4], 
     $time[3]);
 
-  $$man .= ".TH \"".uc($man_name)."\" $man_extension \"$date\" ".
+  $$man .= ".TH \"".uc($man_name)."\" $man_section \"$date\" ".
     "Linux \"$project_name Module Documentation\"\n";
   $$man .= ".SH NAME\n";
   my @function_names;
@@ -276,6 +276,7 @@ sub generate_man {
     $function_signature = join(" ", @param_signatures);
     $function->{signature} = $function_signature;
 
+    $$man .= ".HP\n";
     $$man .= ".BR \"$function->{name}($function->{signature})\"\n";
     $$man .= ".br\n";
   }
@@ -299,16 +300,19 @@ sub generate_man {
     for my $variable (@$variables) {
       $$man .= ".TP\n";
       $$man .= ".B \"$variable->{name}\"\n";
+      $$man .= ".RS\n";
   
       if ($variable->{description}) {
         $$man .= "$variable->{description}\n";
       }
+
+      $$man .= ".RE\n";
     }
   }
 
   $$man .= ".SH FUNCTIONS\n";
   for my $function (@$functions) {
-    $$man .= ".TP\n";
+    $$man .= ".HP\n";
     $$man .= ".BI \"$function->{name}($function->{signature})\"\n";
     $$man .= ".RS\n";
 
@@ -418,20 +422,20 @@ sub find_source {
   foreach $reference_key (keys %references) {
     if ($reference_key =~ /$name_pattern/) {
       $references{$reference_key} = lc($project_name)."_".lc($1).
-        "($man_extension)";
+        "($man_section)";
     }
   }
   
   my $man;
   print_stderr "$generator: - $module{name}: Generating ".
-    "$man_name($man_extension)\n";
+    "$man_name($man_section)\n";
   generate_man($man_name, \%module, \@variables, \@functions, \%references,
     \$man);
 
   if ($doc_type =~ /man/) {
-    my $doc_name = "man${man_extension}/$man_name.$man_extension.gz";
+    my $doc_name = "man${man_section}/$man_name.$man_section.gz";
     print_stderr "Writing $doc_name\n";
-    mkpath("${doc_output}/man${man_extension}");
+    mkpath("${doc_output}/man${man_section}");
     my $pid = open(file, "| $gzip_executable -f > $doc_output/$doc_name") or
       die("Error: Failed to compress $doc_name!\n");
     print file $man;
