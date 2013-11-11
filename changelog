@@ -1,3 +1,9 @@
+ubash (0.1-63) lucid; urgency=low
+
+  * Changed author section naming in gendocs script
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 11 Nov 2013 09:55:00 +0100
+
 ubash (0.1-62) lucid; urgency=low
 
   * Minor change of documentation formatting

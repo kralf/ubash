@@ -373,7 +373,7 @@ sub generate_man {
     $$man .= ".RE\n";
   }
 
-  $$man .= ".SH AUTHOR\n";
+  $$man .= ".SH AUTHORS\n";
   $$man .= "Written by $project_authors.\n";  
 
   $$man .= ".SH REPORTING BUGS\n";
