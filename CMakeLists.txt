@@ -44,3 +44,10 @@ remake_distribute_deb(
   DEPENDS remake groff
   PASS CMAKE_BUILD_TYPE UBASH_GIT_REVISION
 )
+remake_distribute_deb(
+  DISTRIBUTION trusty
+  SECTION misc
+  UPLOAD ppa:kralf/asl
+  DEPENDS remake groff
+  PASS CMAKE_BUILD_TYPE UBASH_GIT_REVISION
+)
